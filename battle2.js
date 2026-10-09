@@ -122,7 +122,7 @@ async function join(){
  throw Error('Alle Plätze sind belegt.');
 }
 async function start(){
- if(role!=='host'||slots().length!==4)throw Error('Vier Spieler müssen beitreten.');
+ if(role!=='host'||slots().length<1)throw Error('Vier Spieler müssen beitreten.');
  await update(path('meta'),{stage:'playing'});
 }
 async function submit(form){
