@@ -53,7 +53,8 @@ buttons.forEach((b,j)=>{b.disabled=true;if(j===q.correct)b.style.background='#ad
 document.getElementById('feedback').textContent=correct?'✅ Richtig! +100 Punkte':'❌ Richtig ist: '+q.options[q.correct];
 document.getElementById('next').disabled=false;
 }
-function done(){
+function done(){ 
+const history=JSON.parse(localStorage.getItem('vb_progress_'+name)||'[]');history.push({score,date:new Date().toLocaleString('de-DE')});localStorage.setItem('vb_progress_'+name,JSON.stringify(history));
 app.innerHTML='<h2>🏆 Geschafft, '+name+'!</h2><p>Du hast '+score+' von '+(questions.length*100)+' Punkten erreicht.</p><p>'+Math.round(score/(questions.length*100)*100)+' % richtig!</p><button id="again">Noch einmal spielen</button><button id="change">Spieler wechseln</button><p><a href="./start.html">Zurück zur Startseite</a></p>';
 document.getElementById('again').onclick=()=>{index=0;score=0;questions=[...QUESTIONS].sort(()=>Math.random()-.5);show()};
 document.getElementById('change').onclick=home;
