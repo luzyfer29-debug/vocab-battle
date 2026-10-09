@@ -1,0 +1,64 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Vocab Battle – Alleine üben</title>
+<style>
+*{box-sizing:border-box}
+body{margin:0;background:linear-gradient(145deg,#171333,#49309a);color:white;font-family:Arial,sans-serif;padding:25px 15px;min-height:100vh}
+main{max-width:550px;margin:auto}
+h1{text-align:center;font-size:34px}
+p{text-align:center;color:#ded8ff}
+.panel{background:#292344;border-radius:20px;padding:22px;margin-top:22px}
+button{display:block;width:100%;padding:17px;margin:12px 0;border:0;border-radius:14px;background:#adff69;color:#171333;font-size:19px;font-weight:bold}
+.option{background:#49416e;color:white;text-align:left}
+.selected{background:#adff69;color:#171333}
+small{color:#ded8ff}
+a{color:#adff69}
+</style>
+</head>
+<body>
+<main>
+<h1>⚡ SOLO BATTLE</h1>
+<p>30 Vokabelfragen · Unit 2 · Station 1 + 2</p>
+<div id="app" class="panel">Lade Fragen …</div>
+</main>
+<script type="module">
+import {QUESTIONS} from './questions.js';
+const app=document.getElementById('app');
+const names=['Luca','Semir','Talea','Nele'];
+let name='',index=0,score=0,selected=null,questions=[];
+function home(){
+app.innerHTML='<h2>Wer spielt heute?</h2>'+names.map((n,i)=>'<button data-name="'+i+'">'+n+'</button>').join('')+'<p>Alleine üben – ohne Schiedsrichter</p><p><a href="./start.html">Zurück zur Startseite</a></p>';
+app.querySelectorAll('[data-name]').forEach(b=>b.onclick=()=>{name=names[Number(b.dataset.name)];index=0;score=0;questions=[...QUESTIONS].sort(()=>Math.random()-.5);show()});
+}
+function show(){
+if(index>=questions.length){done();return}
+selected=null;
+const q=questions[index];
+app.innerHTML='<small>'+name+' · Frage '+(index+1)+' von '+questions.length+' · '+score+' Punkte</small><h2>'+q.question+'</h2><div id="answers"></div><p id="feedback"></p><button id="next" disabled>Weiter →</button>';
+const answers=document.getElementById('answers');
+q.options.forEach((o,i)=>{const b=document.createElement('button');b.className='option';b.textContent='ABCD'[i]+' · '+o;b.onclick=()=>choose(i);answers.appendChild(b)});
+document.getElementById('next').onclick=()=>{index++;show()};
+}
+function choose(i){
+if(selected!==null)return;
+selected=i;
+const q=questions[index];
+const correct=i===q.correct;
+if(correct)score+=100;
+const buttons=[...document.querySelectorAll('.option')];
+buttons.forEach((b,j)=>{b.disabled=true;if(j===q.correct)b.style.background='#adff69',b.style.color='#171333';else if(j===i)b.style.background='#e97575'});
+document.getElementById('feedback').textContent=correct?'✅ Richtig! +100 Punkte':'❌ Richtig ist: '+q.options[q.correct];
+document.getElementById('next').disabled=false;
+}
+function done(){
+app.innerHTML='<h2>🏆 Geschafft, '+name+'!</h2><p>Du hast '+score+' von '+(questions.length*100)+' Punkten erreicht.</p><p>'+Math.round(score/(questions.length*100)*100)+' % richtig!</p><button id="again">Noch einmal spielen</button><button id="change">Spieler wechseln</button><p><a href="./start.html">Zurück zur Startseite</a></p>';
+document.getElementById('again').onclick=()=>{index=0;score=0;questions=[...QUESTIONS].sort(()=>Math.random()-.5);show()};
+document.getElementById('change').onclick=home;
+}
+home();
+</script>
+</body>
+</html>
