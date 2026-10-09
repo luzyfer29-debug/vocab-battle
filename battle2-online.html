@@ -1,0 +1,76 @@
+
+<!doctype html>
+<html lang="de">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Vokabel Battle 2 – Online</title>
+  <style>
+    body {
+      font-family: system-ui, Arial;
+      background: #10152d;
+      color: white;
+      margin: 0;
+      padding: 18px;
+    }
+    main { max-width: 760px; margin: auto; }
+    h1 { color: #7fffe3; }
+    .panel {
+      background: #202849;
+      border-radius: 18px;
+      padding: 20px;
+      margin: 16px 0;
+    }
+    button {
+      background: #00d9ba;
+      color: #09102c;
+      border: 0;
+      padding: 15px;
+      border-radius: 12px;
+      font-size: 17px;
+      font-weight: bold;
+      margin: 6px 0;
+      cursor: pointer;
+    }
+    input {
+      padding: 12px;
+      font-size: 17px;
+      border-radius: 9px;
+      max-width: 90%;
+    }
+    .row {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+    .player, .answer {
+      display: block;
+      padding: 12px;
+      margin: 8px 0;
+      background: #151c37;
+      border-radius: 10px;
+    }
+    .answer { width: 100%; text-align: left; }
+    .selected { background: #00d9ba; }
+    .muted { color: #c9d2ed; }
+    .success { color: #7fffe3; }
+    .error { color: #ff8da8; }
+    .code { font-size: 34px; letter-spacing: 4px; }
+    .score { font-size: 22px; }
+    .timer { font-size: 24px; }
+    .bar { height: 9px; background: #151c37; }
+    .fill { height: 100%; background: #00d9ba; }
+  </style>
+</head>
+<body>
+<main>
+  <h1>⚡ VOKABEL BATTLE 2</h1>
+  <p>👨‍⚖️ Schiedsrichter · 4 Spieler · Online</p>
+  <p id="status">Verbindung wird aufgebaut …</p>
+  <div id="app"></div>
+</main>
+<script type="module" src="./app.js"></script>
+</body>
+</html>
