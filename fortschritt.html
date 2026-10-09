@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Vocab Battle – Lernfortschritt</title>
+<style>
+body{font-family:Arial,sans-serif;background:linear-gradient(145deg,#19143a,#4935a1);color:white;margin:0;padding:24px 15px}
+main{max-width:600px;margin:auto}
+h1{text-align:center;font-size:30px}
+p{text-align:center;color:#ddd}
+.card{background:#292344;padding:20px;border-radius:18px;margin:14px 0}
+h2{margin:0 0 12px}
+.value{color:#adff69;font-size:22px;font-weight:bold}
+a{color:#adff69}
+</style>
+</head>
+<body>
+<main>
+<h1>📊 Lernfortschritt</h1>
+<p>Vocab Battle · Übersicht</p>
+<div id="results"></div>
+<p><a href="./start.html">← Zurück zur Startseite</a></p>
+</main>
+<script>
+const names=['Luca','Semir','Talea','Nele'];
+const results=document.getElementById('results');
+function show(){
+results.innerHTML=names.map(name=>{
+const history=JSON.parse(localStorage.getItem('vb_progress_'+name)||'[]');
+const last=history[history.length-1];
+return '<div class="card"><h2>'+name+'</h2>'+
+(last?'<div class="value">'+last.score+' Punkte</div><p>Letztes Training: '+last.date+'</p><p>Übungen abgeschlossen: '+history.length+'</p>':'<p>Noch keine Ergebnisse gespeichert</p>')+
+'</div>';
+}).join('');
+}
+show();
+</script>
+</body>
+</html>
