@@ -132,7 +132,7 @@ const GRAMMAR=[
    'She has already made a phone call.',
    'She has already written a message.'
   ]},
-  {title:'3 · What has happened? Write six sentences in the present perfect',intro:'Use these verbs in order: fall off · hurt · come · arrive · put · take. Example: There has been an accident. Die Bildaufgabe wird hier mit Satzhinweisen geübt.',open:[
+  {title:'3 · What has happened? Write six sentences in the present perfect',intro:'Look at the picture. What has happened? Write six sentences in the present perfect. You can use these verbs.',image:'unfall-station2.jpg',prompts:['be ✓','fall off','hurt','come','arrive','put','take'],example:'There has been an accident.',open:[
    'A boy has fallen off his bike.',
    'He has hurt his leg.',
    'Two police officers have come.',
@@ -196,7 +196,7 @@ function grammarRender(st,task,checked=false,reveal=false){
    return `<div style="margin:12px 0;line-height:1.85;overflow-wrap:break-word"><strong>${i+1}.</strong> ${esc(before)}<input data-grammar="${i}" aria-label="Aufgabe ${i+1}" autocomplete="off" autocapitalize="none" spellcheck="false" value="${esc(val)}" style="${inputStyle};border:2px solid ${checked?(ok?'#6ee7a8':'#ff8d8d'):'#8c86bd'}">${esc(after)}${reveal&&!ok?`<div style="color:#ffb0b0;font-weight:600">Lösung: ${esc(answers.join(' / '))}</div>`:''}</div>`;
   }).join('');
  }else{
-  if(t.image)content+=`<img src="${esc(t.image)}" alt="Megan im Büro" style="display:block;width:100%;max-width:480px;height:auto;margin:12px auto;border-radius:8px"><p><strong>Wortvorgaben:</strong></p><div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(135px,1fr));gap:8px;margin:10px 0 20px">${t.prompts.map(p=>`<div style="padding:10px;border:1px solid #8c86bd;border-radius:8px">${esc(p)}</div>`).join('')}</div>`;
+  if(t.image)content+=`<img src="${esc(t.image)}" alt="Bild zur Grammatikaufgabe" style="display:block;width:100%;max-width:480px;height:auto;margin:12px auto;border-radius:8px"><p><strong>Wortvorgaben:</strong></p><div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(135px,1fr));gap:8px;margin:10px 0 20px">${t.prompts.map(p=>`<div style="padding:10px;border:1px solid #8c86bd;border-radius:8px">${esc(p)}</div>`).join('')}</div>`;
   content+=t.open.map((example,i)=>`<div style="margin:14px 0"><label style="display:block;margin-bottom:5px"><strong>${i+1}.</strong> ${t.starts?.[i]?`<strong>${esc(t.starts[i])}</strong> <span class="muted">– hier weiterschreiben:</span>`:esc(t.image?'Schreibe einen vollständigen englischen Satz.':t.prompts?.[i]||'Schreibe einen vollständigen englischen Satz.')}</label><textarea data-grammar="${i}" rows="2" spellcheck="false" style="box-sizing:border-box;width:100%;max-width:100%;padding:9px;border-radius:8px;font-size:16px;background:white;color:#17152b">${esc(values[i]||'')}</textarea>${reveal?`<p class="muted">Musterlösung: <strong>${esc(example)}</strong></p>`:''}</div>`).join('');
  }
  const total=t.items?.length||t.open.length,correct=t.items?t.items.filter((x,i)=>x[2].some(a=>grammarNormalize(a)===grammarNormalize(values[i]))).length:0;
