@@ -6,6 +6,8 @@ import {BATTLES} from './questions.js';
 const app=document.querySelector('#app'),status=document.querySelector('#status');
 const names=['Luca','Semir','Talea','Nele'];
 const QUESTION_MS=15000,REVEAL_MS=3000;
+const ADMIN_UID='M41x9WNoHAfqpSmyrztAgf2IZYC3';
+let resetUnsubscribe=null,resetState={},resetReady=false;
 let db,uid='',code='',role='',slot='',room=null,unsubscribe=null,solo=null;
 let clock=null,busy=false,previousStageKey='',lastClockText='';
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -229,11 +231,52 @@ const key='vb2solo';
 const SOLO_NAMES=['Luca','Semir','Talea','Nele'];
 let soloName=localStorage.getItem('vb2solo_name')||'';
 let dashboardUnsubscribe=null,soloHeartbeat=null;
+function resetStamp(name){return Math.max(Number(resetState.all)||0,Number(resetState[name])||0);}
+function clearLocalLearning(name){
+ const prefixes=[`vb2solo_${name}_battle_`,`vb2first_${name}_`,`vb2grammar_${name}_`,`vb2gap_${name}_`];
+ for(let i=localStorage.length-1;i>=0;i--){const k=localStorage.key(i);if(k&&prefixes.some(p=>k.startsWith(p)))localStorage.removeItem(k);}
+ if(soloName===name){solo=null;stopSoloHeartbeat();}
+}
+function applyResetState(state){
+ resetState=state&&typeof state==='object'?state:{};
+ for(const name of SOLO_NAMES){
+  const stamp=resetStamp(name),key=`vb2reset_seen_${name}`;
+  if(stamp>Number(localStorage.getItem(key)||0)){
+   clearLocalLearning(name);localStorage.setItem(key,String(stamp));
+   if(soloName===name){grammarStation=null;grammarTask=null;gapStation=null;soloHome();msg('Lernstände und Fehlerlisten wurden zurückgesetzt.');}
+  }
+ }
+ resetReady=true;
+}
+function watchResets(){
+ if(resetUnsubscribe)resetUnsubscribe();
+ resetReady=false;
+ resetUnsubscribe=onValue(ref(db,'learningResets'),snap=>applyResetState(snap.val()),e=>msg('Reset-Abgleich fehlgeschlagen: '+e.message,true));
+}
+async function resetLearning(){
+ if(uid!==ADMIN_UID){msg('Nur der Schiedsrichter darf Lernstände zurücksetzen.',true);return;}
+ const target=document.querySelector('#reset-target')?.value||'all';
+ const label=target==='all'?'ALLE vier Kinder':target;
+ if(!confirm(`Wirklich ${label} vollständig zurücksetzen?\nPunkte, Fortschritte und Fehlerlisten werden gelöscht.`))return;
+ try{
+  const stamp=Date.now();
+  await set(ref(db,`learningResets/${target}`),stamp);
+  const snap=await get(ref(db,'soloProgress'));
+  if(target==='all')await remove(ref(db,'soloProgress'));
+  else if(snap.exists()){
+   const changes={};
+   for(const device of Object.keys(snap.val()||{}))if(snap.child(`${device}/${target}`).exists())changes[`${device}/${target}`]=null;
+   if(Object.keys(changes).length)await update(ref(db,'soloProgress'),changes);
+  }
+  applyResetState({...resetState,[target]:stamp});
+  msg(`${label} zurückgesetzt. Die Kinderhandys übernehmen den Neustart beim nächsten Öffnen.`);
+ }catch(e){msg('Zurücksetzen fehlgeschlagen: '+e.message,true);}
+}
 function stopSoloHeartbeat(){if(soloHeartbeat!==null){clearInterval(soloHeartbeat);soloHeartbeat=null;}}
 function startSoloHeartbeat(){stopSoloHeartbeat();soloHeartbeat=setInterval(()=>{if(solo&&soloName)void syncSolo();},30000);}
 function stopDashboard(){if(dashboardUnsubscribe){dashboardUnsubscribe();dashboardUnsubscribe=null;}}
 function stopClock(){if(clock!==null){clearInterval(clock);clock=null;}lastClockText='';}
-function home(){stopDashboard();stopSoloHeartbeat();if(unsubscribe){unsubscribe();unsubscribe=null;}stopClock();code='';role='';slot='';room=null;solo=null;busy=false;previousStageKey='';status.textContent='';app.innerHTML=card(`<h2>Was möchtest du machen?</h2><div class="buttons">${btn('👥 Spiel beitreten','join')}${btn('📚 Alleine lernen','solo')}</div>`)+card('<p class="muted">Hier kannst du alleine lernen oder mit einem Raumcode am Battle teilnehmen. Alle vier Kinder können gleichzeitig auf ihren eigenen Geräten lernen.</p>');}
+function home(){stopDashboard();stopSoloHeartbeat();if(unsubscribe){unsubscribe();unsubscribe=null;}stopClock();code='';role='';slot='';room=null;solo=null;busy=false;previousStageKey='';status.textContent='';app.innerHTML=card(`<h2>Was möchtest du machen?</h2><div class="buttons">${btn('👥 Spiel beitreten','join')}${btn('📚 Alleine lernen','solo')}${uid===ADMIN_UID?btn('📊 Live-Lernübersicht','dashboard'):''}</div>`)+card('<p class="muted">Hier kannst du alleine lernen oder mit einem Raumcode am Battle teilnehmen. Alle vier Kinder können gleichzeitig auf ihren eigenen Geräten lernen.</p>');}
 function listen(){if(unsubscribe)unsubscribe();stopClock();unsubscribe=onValue(ref(db,`rooms/${code}`),snap=>{room=snap.val();if(!room){msg('Raum nicht gefunden oder gelöscht.',true);return;}render();},e=>msg('Firebase-Zugriff verweigert: '+e.message,true));}
 function current(){const b=Number(room?.meta?.battle||1)-1;return BATTLES[b]?.[Number(room?.meta?.index||0)%30];}
 function players(){return Object.entries(room?.slots||{}).map(([id,p])=>({id,...p})).sort((a,b)=>(b.score||0)-(a.score||0));}
@@ -297,7 +340,7 @@ function soloSaved(b){try{const s=JSON.parse(localStorage.getItem(soloKey(b))||'
  if(s.reviewPos>=s.wrong.length)s.reviewPos=0;
  return s;
 }catch{return null;}}
-async function syncSolo(){if(!uid||!db||!solo||!soloName)return;try{await set(ref(db,`soloProgress/${uid}/${soloName}/battle${solo.battle+1}`),{name:soloName,battle:solo.battle+1,done:solo.index,correct:Math.floor(solo.score/10),score:solo.score,finished:!!solo.finished,mistakes:cleanMistakes(solo.mistakes),updatedAt:Date.now()});}catch(e){msg('Online-Speicherung noch nicht möglich: '+e.message,true);}}
+async function syncSolo(){if(!uid||!db||!solo||!soloName||!resetReady)return;try{const rs=await get(ref(db,'learningResets'));applyResetState(rs.val());if(!solo)return;await set(ref(db,`soloProgress/${uid}/${soloName}/battle${solo.battle+1}`),{name:soloName,battle:solo.battle+1,done:solo.index,correct:Math.floor(solo.score/10),score:solo.score,finished:!!solo.finished,mistakes:cleanMistakes(solo.mistakes),updatedAt:Date.now()});}catch(e){msg('Online-Speicherung noch nicht möglich: '+e.message,true);}}
 function soloChooseName(){stopSoloHeartbeat();app.innerHTML=card(`<h2>📚 Wer lernt gerade?</h2><p>Wähle deinen Namen, damit der Schiedsrichter deinen Lernfortschritt sehen kann.</p><div class="buttons">${SOLO_NAMES.map((n,i)=>btn(esc(n),`soloName${i}`)).join('')}</div>`)+card(btn('Zurück','home','alt'));}
 function soloSetName(i){soloName=SOLO_NAMES[i];localStorage.setItem('vb2solo_name',soloName);soloHome();}
 function soloHome(){grammarCollect();stopSoloHeartbeat();if(!soloName){soloChooseName();return;}solo=null;app.innerHTML=card(`<h2>📚 ${esc(soloName)} · Battle auswählen</h2><p>30 Fragen pro Battle. Falsche Wörter werden danach wiederholt. Der Fortschritt wird auf diesem Handy und zusätzlich online gespeichert.</p>${[0,1,2].map(b=>{const saved=soloSaved(b),done=saved?.index||0;const reviewing=saved&&!saved.finished&&saved.review&&saved.wrong.length;return `<div class="player"><h3>Battle ${b+1}</h3><p>${done} von 30 Fragen erledigt${reviewing?` · 🔁 ${saved.wrong.length} Wörter üben`:''}${saved?.finished?' · abgeschlossen':''}</p><div class="buttons">${btn(saved?'Neu beginnen':'Starten',`soloStart${b}`)}${saved&&!saved.finished?btn('Fortsetzen',`soloResume${b}`,'alt'):''}</div></div>`;}).join('')}${btn('📘 Grammatik · Station 1 & 2','grammarMenu')}${btn('✍️ Lückentext 1 · Station 1','gap0')}${btn('✍️ Lückentext 2 · Station 2','gap1')}${btn('📕 Meine Fehlerliste','soloMistakes','alt')}${btn('Anderen Namen wählen','soloChangeName','alt')}`)+card(btn('Zurück','home','alt'));}
@@ -329,7 +372,7 @@ function soloFinished(){if(!solo)return;stopSoloHeartbeat();solo.finished=true;s
 function renderDashboard(entries){
  const latest={};
  for(const perDevice of Object.values(entries||{}))for(const [name,perBattle] of Object.entries(perDevice||{}))if(SOLO_NAMES.includes(name))for(const [battle,v] of Object.entries(perBattle||{})){
-  if(!/^battle[123]$/.test(battle)||!v||typeof v!=='object')continue;
+  if(!/^battle[123]$/.test(battle)||!v||typeof v!=='object'||Number(v.updatedAt||0)<=resetStamp(name))continue;
   const k=name+':'+battle;if(!latest[k]||Number(v.updatedAt)>Number(latest[k].updatedAt))latest[k]=v;
  }
  const now=Date.now();
@@ -349,7 +392,7 @@ function renderDashboard(entries){
   const recent=last&&now-Number(last.updatedAt||0)<90000;
   return `<details style="margin:12px 0;padding:12px;background:rgba(255,255,255,.06);border-radius:12px"><summary><strong>${esc(name)}</strong> ${recent?'🟢':'⚪'} · Details ansehen</summary>${records.map((v,i)=>`<p><strong>Battle ${i+1}:</strong> ${v?`${Math.min(30,Number(v.done)||0)}/30 erledigt · ${Number(v.correct)||0} richtig · ${Number(v.score)||0} Punkte · zuletzt ${v.updatedAt?new Date(v.updatedAt).toLocaleString('de-DE'):'–'}`:'Noch keine Online-Daten'}</p>`).join('')}</details>`;
  }).join('');
- app.innerHTML=card('<h2>📊 Live-Lernübersicht</h2><p>Alle vier Kinder auf einen Blick. In den Battle-Spalten steht: erledigte Fragen / 30 · Punkte. 🟢 bedeutet Aktivität in den letzten 90 Sekunden.</p>'+table+'<p class="muted">Wische die Tabelle seitlich, um alle Spalten zu sehen.</p><h3>Einzelheiten</h3>'+detailRows)+card(btn('Zurück','home','alt'));
+ app.innerHTML=card('<h2>📊 Live-Lernübersicht</h2><p>Alle vier Kinder auf einen Blick. In den Battle-Spalten steht: erledigte Fragen / 30 · Punkte. 🟢 bedeutet Aktivität in den letzten 90 Sekunden.</p>'+table+'<p class="muted">Wische die Tabelle seitlich, um alle Spalten zu sehen.</p><h3>Einzelheiten</h3>'+detailRows)+(uid===ADMIN_UID?card('<h2>🔄 Lernstände zurücksetzen</h2><p>Punkte, Fortschritte und Fehlerlisten werden gelöscht. Die Kinderhandys übernehmen den Reset beim nächsten Öffnen.</p><label>Wen zurücksetzen?<select id="reset-target"><option value="all">Alle vier Kinder</option>'+SOLO_NAMES.map(n=>`<option value="${n}">${n}</option>`).join('')+'</select></label>'+btn('🗑️ Lernstände zurücksetzen','resetLearning','alt')):'')+card(btn('Zurück','home','alt'));
 }
 function showDashboard(){
  stopDashboard();stopSoloHeartbeat();
@@ -357,9 +400,9 @@ function showDashboard(){
  if(!uid){msg('Bitte kurz warten, bis die Anmeldung abgeschlossen ist.',true);return;}
  dashboardUnsubscribe=onValue(ref(db,'soloProgress'),snap=>{renderDashboard(snap.val());},e=>msg('Lernübersicht konnte nicht geladen werden: '+e.message,true));
 }
-document.addEventListener('click',e=>{const a=e.target.closest('[data-action]'),ans=e.target.closest('[data-answer]'),sa=e.target.closest('[data-soloanswer]');if(ans){answer(Number(ans.dataset.answer));return;}if(sa){soloAnswer(Number(sa.dataset.soloanswer));return;}if(!a)return;const v=a.dataset.action;if(v==='home')home();else if(v==='host'||v==='createRoom'||v==='dashboard'||v==='start'||v==='reset')return;else if(v==='join')joinForm();else if(v==='enter')enter();else if(['start','reset'].includes(v))hostAction(v);else if(v==='solo')soloChooseName();else if(v==='dashboard')void showDashboard();else if(v==='soloChangeName')soloChooseName();else if(v==='soloMistakes')showMyMistakes();else if(v==='soloHome')soloHome();else if(v==='grammarMenu')grammarMenu();else if(v==='grammarStation0')grammarStationMenu(0);else if(v==='grammarStation1')grammarStationMenu(1);else if(/^grammarTask\d+$/.test(v)){const n=Number(v.slice(11));if(grammarStation!==null&&n<GRAMMAR[grammarStation].tasks.length)grammarRender(grammarStation,n);}else if(v==='grammarCheck')grammarCheck();else if(v==='grammarReveal')grammarReveal();else if(v==='grammarClear')grammarClear();else if(v==='grammarBack')grammarStationMenu(grammarStation);else if(v==='gap0')gapRender(0);else if(v==='gap1')gapRender(1);else if(v==='gapCheck')gapCheck();else if(v==='gapClear')gapClear();else if(/^soloName[0-3]$/.test(v))soloSetName(Number(v.slice(-1)));else if(/^soloStart[012]$/.test(v))soloStart(Number(v.slice(-1)));else if(/^soloResume[012]$/.test(v))soloResume(Number(v.slice(-1)));else if(v==='soloNext')soloNext();});
+document.addEventListener('click',e=>{const a=e.target.closest('[data-action]'),ans=e.target.closest('[data-answer]'),sa=e.target.closest('[data-soloanswer]');if(ans){answer(Number(ans.dataset.answer));return;}if(sa){soloAnswer(Number(sa.dataset.soloanswer));return;}if(!a)return;const v=a.dataset.action;if(v==='home')home();else if(v==='host'||v==='createRoom')return;else if(v==='join')joinForm();else if(v==='enter')enter();else if(['start','reset'].includes(v))hostAction(v);else if(v==='solo')soloChooseName();else if(v==='dashboard')void showDashboard();else if(v==='resetLearning')void resetLearning();else if(v==='soloChangeName')soloChooseName();else if(v==='soloMistakes')showMyMistakes();else if(v==='soloHome')soloHome();else if(v==='grammarMenu')grammarMenu();else if(v==='grammarStation0')grammarStationMenu(0);else if(v==='grammarStation1')grammarStationMenu(1);else if(/^grammarTask\d+$/.test(v)){const n=Number(v.slice(11));if(grammarStation!==null&&n<GRAMMAR[grammarStation].tasks.length)grammarRender(grammarStation,n);}else if(v==='grammarCheck')grammarCheck();else if(v==='grammarReveal')grammarReveal();else if(v==='grammarClear')grammarClear();else if(v==='grammarBack')grammarStationMenu(grammarStation);else if(v==='gap0')gapRender(0);else if(v==='gap1')gapRender(1);else if(v==='gapCheck')gapCheck();else if(v==='gapClear')gapClear();else if(/^soloName[0-3]$/.test(v))soloSetName(Number(v.slice(-1)));else if(/^soloStart[012]$/.test(v))soloStart(Number(v.slice(-1)));else if(/^soloResume[012]$/.test(v))soloResume(Number(v.slice(-1)));else if(v==='soloNext')soloNext();});
 document.addEventListener('input',e=>{if(e.target.matches('[data-gap]'))gapCollect();if(e.target.matches('[data-grammar]'))grammarCollect();});
 document.addEventListener('change',e=>{if(e.target.matches('[data-grammar]'))grammarCollect();});
 document.addEventListener('focusout',e=>{if(e.target.matches('[data-grammar]'))grammarCollect();});
 window.addEventListener('pagehide',()=>grammarCollect());
-home();try{const fb=initializeApp(firebaseConfig),auth=getAuth(fb);db=getDatabase(fb);onAuthStateChanged(auth,u=>{if(u)uid=u.uid;else signInAnonymously(auth).catch(e=>msg('Anmeldung fehlgeschlagen: '+e.message,true));});}catch(e){msg('Firebase-Konfiguration fehlerhaft: '+e.message,true);}
+home();try{const fb=initializeApp(firebaseConfig),auth=getAuth(fb);db=getDatabase(fb);onAuthStateChanged(auth,u=>{if(u){uid=u.uid;watchResets();if(!role&&!solo&&app.textContent.includes('Was möchtest du machen?'))home();}else signInAnonymously(auth).catch(e=>msg('Anmeldung fehlgeschlagen: '+e.message,true));});}catch(e){msg('Firebase-Konfiguration fehlerhaft: '+e.message,true);}
