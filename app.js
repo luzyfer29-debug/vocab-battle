@@ -73,13 +73,23 @@ function renderDashboard(entries){
   const k=name+':'+battle;if(!latest[k]||Number(v.updatedAt)>Number(latest[k].updatedAt))latest[k]=v;
  }
  const now=Date.now();
- const rows=SOLO_NAMES.map(name=>{
+ const cells=SOLO_NAMES.map(name=>{
   const records=[1,2,3].map(b=>latest[name+':battle'+b]);
   const last=records.filter(Boolean).sort((a,b)=>Number(b.updatedAt||0)-Number(a.updatedAt||0))[0];
   const recent=last&&now-Number(last.updatedAt||0)<90000;
-  return `<div class="player"><h3>${esc(name)} · ${recent?'🟢 Gerade aktiv':'⚪ Nicht kürzlich aktiv'}</h3>${[1,2,3].map(b=>{const v=records[b-1];return `<p><strong>Battle ${b}:</strong> ${v?`${Math.min(30,Number(v.done)||0)}/30 erledigt · ${Number(v.correct)||0} richtig · zuletzt ${v.updatedAt?new Date(v.updatedAt).toLocaleString('de-DE'):'–'}`:'Noch keine Online-Daten'}</p>`;}).join('')}</div>`;
+  const details=records.map(v=>v?`${Math.min(30,Number(v.done)||0)}/30 · ${Number(v.score)||0} P`:'–');
+  const sum=records.reduce((acc,v)=>acc+(Number(v?.score)||0),0);
+  const done=records.reduce((acc,v)=>acc+Math.min(30,Number(v?.done)||0),0);
+  return `<tr><th scope="row">${esc(name)} ${recent?'🟢':'⚪'}</th>${details.map(d=>`<td>${d}</td>`).join('')}<td><strong>${done}/90</strong><br>${sum} P</td></tr>`;
  }).join('');
- app.innerHTML=card('<h2>📊 Live-Lernübersicht</h2><p>Aktualisiert sich automatisch, wenn die Kinder lernen. 🟢 bedeutet: Aktivität innerhalb der letzten 90 Sekunden (keine garantierte Online-Anzeige).</p>'+rows)+card(btn('Zurück','home','alt'));
+ const table=`<div style="overflow-x:auto;max-width:100%"><table style="width:100%;border-collapse:collapse;font-size:0.85rem;min-width:490px;text-align:left"><thead><tr><th style="padding:10px 6px">Kind</th><th>Battle 1</th><th>Battle 2</th><th>Battle 3</th><th>Gesamt</th></tr></thead><tbody>${cells}</tbody></table></div>`;
+ const detailRows=SOLO_NAMES.map(name=>{
+  const records=[1,2,3].map(b=>latest[name+':battle'+b]);
+  const last=records.filter(Boolean).sort((a,b)=>Number(b.updatedAt||0)-Number(a.updatedAt||0))[0];
+  const recent=last&&now-Number(last.updatedAt||0)<90000;
+  return `<details style="margin:12px 0;padding:12px;background:rgba(255,255,255,.06);border-radius:12px"><summary><strong>${esc(name)}</strong> ${recent?'🟢':'⚪'} · Details ansehen</summary>${records.map((v,i)=>`<p><strong>Battle ${i+1}:</strong> ${v?`${Math.min(30,Number(v.done)||0)}/30 erledigt · ${Number(v.correct)||0} richtig · ${Number(v.score)||0} Punkte · zuletzt ${v.updatedAt?new Date(v.updatedAt).toLocaleString('de-DE'):'–'}`:'Noch keine Online-Daten'}</p>`).join('')}</details>`;
+ }).join('');
+ app.innerHTML=card('<h2>📊 Live-Lernübersicht</h2><p>Alle vier Kinder auf einen Blick. In den Battle-Spalten steht: erledigte Fragen / 30 · Punkte. 🟢 bedeutet Aktivität in den letzten 90 Sekunden.</p>'+table+'<p class="muted">Wische die Tabelle seitlich, um alle Spalten zu sehen.</p><h3>Einzelheiten</h3>'+detailRows)+card(btn('Zurück','home','alt'));
 }
 function showDashboard(){
  stopDashboard();stopSoloHeartbeat();
