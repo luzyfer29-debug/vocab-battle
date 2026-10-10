@@ -106,34 +106,16 @@ function soloAnswer(i){if(!solo||solo.finished)return;const reviewing=solo.revie
 }
 function soloNext(){if(!solo)return;soloQuestion();}
 function soloFinished(){if(!solo)return;stopSoloHeartbeat();solo.finished=true;solo.index=30;solo.wrong=[];solo.review=false;solo.reviewPos=0;soloSave();app.innerHTML=card(`<h2>🏆 Battle ${solo.battle+1} abgeschlossen!</h2><p>Alle Wörter wurden richtig geübt.</p><p class="score">${solo.score} von 300 Punkten</p>${btn('Battle wiederholen',`soloStart${solo.battle}`)}`)+card(btn('Anderes Battle auswählen','solo','alt'));}
-function renderDashboard(entries){
- const latest={};
- for(const perDevice of Object.values(entries||{}))for(const [name,perBattle] of Object.entries(perDevice||{}))if(SOLO_NAMES.includes(name))for(const [battle,v] of Object.entries(perBattle||{})){
-  if(!/^battle[123]$/.test(battle)||!v||typeof v!=='object')continue;
-  const k=name+':'+battle;if(!latest[k]||Number(v.updatedAt)>Number(latest[k].updatedAt))latest[k]=v;
- }
- const now=Date.now();
- const cells=SOLO_NAMES.map(name=>{
-  const records=[1,2,3].map(b=>latest[name+':battle'+b]);
-  const last=records.filter(Boolean).sort((a,b)=>Number(b.updatedAt||0)-Number(a.updatedAt||0))[0];
-  const recent=last&&now-Number(last.updatedAt||0)<90000;
-  const details=records.map(v=>v?`${Math.min(30,Number(v.done)||0)}/30 · ${Number(v.score)||0} P`:'–');
-  const sum=records.reduce((acc,v)=>acc+(Number(v?.score)||0),0);
-  const done=records.reduce((acc,v)=>acc+Math.min(30,Number(v?.done)||0),0);
-  return `<tr><th scope="row">${esc(name)} ${recent?'🟢':'⚪'}</th>${details.map(d=>`<td>${d}</td>`).join('')}<td><strong>${done}/90</strong><br>${sum} P</td></tr>`;
+function renderDashboard(englishEntries,mathEntries){
+ const newest=entries=>{const latest={};for(const perDevice of Object.values(entries||{}))for(const [name,perBattle] of Object.entries(perDevice||{}))if(SOLO_NAMES.includes(name))for(const [battle,v] of Object.entries(perBattle||{})){if(!/^battle[123]$/.test(battle)||!v||typeof v!=='object')continue;const k=name+':'+battle;if(!latest[k]||Number(v.updatedAt)>Number(latest[k].updatedAt))latest[k]=v;}return latest;};
+ const english=newest(englishEntries),math=newest(mathEntries),now=Date.now();
+ const sections=[['🇬🇧 Englisch',english,false],['🔢 Mathe Klasse 7 NRW',math,true]].map(([heading,latest,isMath])=>{
+  const rows=SOLO_NAMES.map(name=>{const records=[1,2,3].map(b=>latest[name+':battle'+b]);const recent=records.some(v=>v&&now-Number(v.updatedAt||0)<90000);const cells=records.map(v=>v?`${Math.min(30,Number(v.done)||0)}/30 · ${Number(v.score)||0} P`:'–');const done=records.reduce((n,v)=>n+Math.min(30,Number(v?.done)||0),0),points=records.reduce((n,v)=>n+(Number(v?.score)||0),0);return `<tr><th style="padding:10px 6px">${esc(name)} ${recent?'🟢':'⚪'}</th>${cells.map(x=>`<td>${x}</td>`).join('')}<td><strong>${done}/90</strong><br>${points} P</td></tr>`;}).join('');
+  const table=`<div style="overflow-x:auto"><table style="width:100%;min-width:490px;text-align:left"><thead><tr><th>Kind</th><th>Battle 1</th><th>Battle 2</th><th>Battle 3</th><th>Gesamt</th></tr></thead><tbody>${rows}</tbody></table></div>`;
+  const details=SOLO_NAMES.map(name=>{const records=[1,2,3].map(b=>latest[name+':battle'+b]);const content=records.map((v,b)=>{const summary=`<p><strong>Battle ${b+1}:</strong> ${v?`${Math.min(30,Number(v.done)||0)}/30 · ${Number(v.score)||0} Punkte`:'Noch keine Online-Daten'}</p>`;let mistakes='';if(isMath){mistakes=Object.entries(v?.mistakes||{}).map(([i,count])=>{const q=MATH_BATTLES[b]?.[Number(i)];return q?`<div class="player">${esc(q.q)} → <strong>${esc(q.options[q.correct])}</strong> · ${Number(count)||0}× falsch</div>`:'';}).join('');}else{mistakes=mistakeRows(b,v?.mistakes).map(x=>`<div class="player">${esc(x.word)} – ${esc(x.translation)} · ${x.count}× falsch</div>`).join('');}return summary+(mistakes||'<p class="muted">Keine Fehler online erfasst.</p>');}).join('');return `<details class="player"><summary><strong>${esc(name)}</strong> · Ergebnisse und Fehlerliste</summary>${content}</details>`;}).join('');
+  return card(`<h2>${heading}</h2><p class="muted">Erledigte Aufgaben / 30 · Punkte</p>${table}<h3>Fehlerlisten und Einzelheiten</h3>${details}`);
  }).join('');
- const table=`<div style="overflow-x:auto;max-width:100%"><table style="width:100%;border-collapse:collapse;font-size:0.85rem;min-width:490px;text-align:left"><thead><tr><th style="padding:10px 6px">Kind</th><th>Battle 1</th><th>Battle 2</th><th>Battle 3</th><th>Gesamt</th></tr></thead><tbody>${cells}</tbody></table></div>`;
- const detailRows=SOLO_NAMES.map(name=>{
-  const records=[1,2,3].map(b=>latest[name+':battle'+b]);
-  const last=records.filter(Boolean).sort((a,b)=>Number(b.updatedAt||0)-Number(a.updatedAt||0))[0];
-  const recent=last&&now-Number(last.updatedAt||0)<90000;
-  const errors=records.map((v,i)=>{
-   const list=mistakeRows(i,v?.mistakes);
-   return `<h4>Battle ${i+1}</h4>${list.length?list.map(x=>`<div class="player"><strong>${esc(x.word)}</strong> – ${esc(x.translation)}<p class="muted">${x.count}× falsch beantwortet</p></div>`).join(''):'<p class="muted">Noch keine Fehler online erfasst.</p>'}`;
-  }).join('');
-  return `<details style="margin:12px 0;padding:12px;background:rgba(255,255,255,.06);border-radius:12px"><summary><strong>${esc(name)}</strong> ${recent?'🟢':'⚪'} · Details und Fehlerliste ansehen</summary>${records.map((v,i)=>`<p><strong>Battle ${i+1}:</strong> ${v?`${Math.min(30,Number(v.done)||0)}/30 erledigt · ${Number(v.correct)||0} richtig · ${Number(v.score)||0} Punkte · zuletzt ${v.updatedAt?new Date(v.updatedAt).toLocaleString('de-DE'):'–'}`:'Noch keine Online-Daten'}</p>`).join('')}<h3>📕 Fehlerliste</h3>${errors}</details>`;
- }).join('');
- app.innerHTML=card('<h2>📊 Live-Lernübersicht</h2><p>Alle vier Kinder auf einen Blick. In den Battle-Spalten steht: erledigte Fragen / 30 · Punkte. 🟢 bedeutet Aktivität in den letzten 90 Sekunden.</p>'+table+'<p class="muted">Wische die Tabelle seitlich, um alle Spalten zu sehen.</p><h3>Einzelheiten</h3>'+detailRows)+card('<h2>🗑️ Lernstände zurücksetzen</h2><p>Nur für den Schiedsrichter. Wähle ein Kind oder alle vier aus.</p><label>Auswahl<select id="reset-target"><option value="Luca">Luca</option><option value="Semir">Semir</option><option value="Talea">Talea</option><option value="Nele">Nele</option><option value="all">Alle vier Kinder</option></select></label>'+btn('🗑️ Lernstände zurücksetzen','resetLearning'))+card(btn('Zurück','home','alt'));
+ app.innerHTML=card('<h2>📊 Live-Lernübersicht</h2><p>Englisch und Mathe getrennt. 🟢 = Aktivität in den letzten 90 Sekunden.</p>')+sections+card('<h2>🗑️ Lernstände zurücksetzen</h2><p>Nur für den Schiedsrichter.</p><label>Auswahl<select id="reset-target"><option value="Luca">Luca</option><option value="Semir">Semir</option><option value="Talea">Talea</option><option value="Nele">Nele</option><option value="all">Alle vier Kinder</option></select></label>'+btn('🗑️ Lernstände zurücksetzen','resetLearning'))+card(btn('Zurück','home','alt'));
 }
 async function resetLearning(){
  if(resetBusy||!adminLoggedIn||uid!==ADMIN_UID){msg('Nur der Schiedsrichter darf Lernstände löschen.',true);return;}
@@ -165,7 +147,7 @@ function showDashboard(){
  stopDashboard();stopSoloHeartbeat();
  app.innerHTML=card('<h2>📊 Live-Lernübersicht</h2><p>Online-Lernstände werden geladen …</p>')+card(btn('Zurück','home','alt'));
  if(!uid){msg('Bitte kurz warten, bis die Anmeldung abgeschlossen ist.',true);return;}
- dashboardUnsubscribe=onValue(ref(db,'soloProgress'),snap=>{renderDashboard(snap.val());},e=>msg('Lernübersicht konnte nicht geladen werden: '+e.message,true));
+ let englishData={},mathData={};const refresh=()=>renderDashboard(englishData,mathData);const offEnglish=onValue(ref(db,'soloProgress'),snap=>{englishData=snap.val()||{};refresh();},e=>msg('Englisch konnte nicht geladen werden: '+e.message,true));const offMath=onValue(ref(db,'mathProgress'),snap=>{mathData=snap.val()||{};refresh();},e=>msg('Mathe konnte nicht geladen werden: '+e.message+'. Bitte Firebase-Regeln für mathProgress prüfen.',true));dashboardUnsubscribe=()=>{offEnglish();offMath();};
 }
 
 // === Mathe Klasse 7 NRW: rationale Zahlen ===
