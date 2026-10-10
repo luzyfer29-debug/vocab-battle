@@ -1,4 +1,3 @@
-// Firebase-Projekt: Englisch Vokabeln
 export const firebaseConfig = {
   apiKey: "AIzaSyCZCaQTX-eUohEAdyVquK5qvC3AVH92Tts",
   authDomain: "englisch-vokabeln-157c0.firebaseapp.com",
