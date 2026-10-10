@@ -54,6 +54,26 @@ function gapStorageKey(n){return `vb2gap_${soloName}_station_${n+1}`;}
 function gapLoad(n){try{const v=JSON.parse(localStorage.getItem(gapStorageKey(n))||'null');return Array.isArray(v)?v:[];}catch{return [];}}
 function gapSave(n,values){localStorage.setItem(gapStorageKey(n),JSON.stringify(values));}
 function gapFields(n){return GAP_SETS[n].groups.flatMap(g=>g.answers);}
+// Erstversuche bleiben pro Kind und Aufgabe lokal gespeichert.
+// Die Schluessel sind kompatibel mit der zuvor verwendeten Lernverlauf-Version.
+function firstKey(type,id){return `vb2first_${soloName}_${type}_${id}`;}
+function firstRead(type,id){try{return JSON.parse(localStorage.getItem(firstKey(type,id))||'null');}catch{return null;}}
+function firstCapture(type,id,answers,values,title){
+ if(!soloName||firstRead(type,id))return;
+ const inputs=values.map(v=>String(v||''));
+ const errors=answers?inputs.map((answer,i)=>({position:i+1,answer,correct:(answers[i]||[]).join(' / '),ok:(answers[i]||[]).some(a=>grammarNormalize(a)===grammarNormalize(answer))})).filter(x=>!x.ok):[];
+ const record={title,total:inputs.length,correct:answers?inputs.length-errors.length:null,errors,inputs,checkedAt:Date.now(),selfCheck:!answers};
+ try{localStorage.setItem(firstKey(type,id),JSON.stringify(record));}catch{}
+}
+function firstSummary(type,id,values,answers){
+ const first=firstRead(type,id);if(!first)return '';
+ const current=answers?answers.filter((a,i)=>a.some(x=>grammarNormalize(x)===grammarNormalize(values[i]))).length:null;
+ const original=first.selfCheck?'Freie Sätze – Selbstkontrolle':`${Number(first.correct)||0} von ${first.total} richtig`;
+ const now=answers?`${current} von ${answers.length} richtig`:'Freie Sätze – Selbstkontrolle';
+ const errors=first.selfCheck?'<p>Deine ersten Sätze sind gespeichert und können mit den Musterlösungen verglichen werden.</p>':(first.errors||[]).length?`<details><summary>Fehler des ersten Versuchs (${first.errors.length})</summary>${first.errors.map(x=>`<p><strong>Nr. ${Number(x.position)}:</strong> ${esc(x.answer||'(leer)')} → ${esc(x.correct||'')}</p>`).join('')}</details>`:'<p>Beim ersten Versuch alles richtig! 🎉</p>';
+ return `<div style="margin:16px 0;padding:14px;border:1px solid #8c86bd;border-radius:12px"><h3>📋 Dein Lernverlauf</h3><p><strong>Erster Versuch:</strong> ${original}</p><p><strong>Aktueller Stand:</strong> ${now}</p>${errors}<p class="muted">Der erste Versuch bleibt auf diesem Handy gespeichert.</p></div>`;
+}
+
 function gapRender(n,checked=false){
  if(!soloName){soloChooseName();return;}
  gapStation=n;
@@ -70,10 +90,10 @@ function gapRender(n,checked=false){
   return `<h3>${esc(group.title)}</h3><p style="line-height:1.85;overflow-wrap:break-word">${html}</p>`;
  }).join('');
  const count=answers.filter((a,i)=>a.some(x=>x.toLowerCase()===String(saved[i]||'').trim().toLowerCase())).length;
- app.innerHTML=card(`<h2>✍️ ${esc(data.title)}</h2><p>Schreibe die englischen Wörter in die Lücken. Die Reihenfolge entspricht dem Arbeitsblatt. Beim erneuten Öffnen beginnt die Übung mit leeren Feldern.</p>${checked?`<p class="good"><strong>${count} von ${answers.length} richtig.</strong> Rote Lücken kannst du verbessern und erneut prüfen.</p>`:''}${body}<div class="buttons">${btn('✅ Antworten prüfen','gapCheck')}${btn('🔄 Lücken leeren','gapClear','alt')}</div>`)+card(btn('Zur Battle-Auswahl','soloHome','alt'));
+ app.innerHTML=card(`<h2>✍️ ${esc(data.title)}</h2><p>Schreibe die englischen Wörter in die Lücken. Die Reihenfolge entspricht dem Arbeitsblatt. Beim erneuten Öffnen beginnt die Übung mit leeren Feldern.</p>${checked?`<p class="good"><strong>${count} von ${answers.length} richtig.</strong> Rote Lücken kannst du verbessern und erneut prüfen.</p>`:''}${body}${firstSummary('gap',n,saved,answers)}<div class="buttons">${btn('✅ Antworten prüfen','gapCheck')}${btn('🔄 Lücken leeren','gapClear','alt')}</div>`)+card(btn('Zur Battle-Auswahl','soloHome','alt'));
 }
 function gapCollect(){if(gapStation===null)return;gapSave(gapStation,Array.from(document.querySelectorAll('[data-gap]'),el=>el.value));}
-function gapCheck(){if(gapStation===null)return;gapCollect();gapRender(gapStation,true);}
+function gapCheck(){if(gapStation===null)return;gapCollect();firstCapture('gap',gapStation,gapFields(gapStation),gapLoad(gapStation),GAP_SETS[gapStation].title);gapRender(gapStation,true);}
 function gapClear(){if(gapStation===null)return;gapSave(gapStation,[]);gapRender(gapStation);}
 
 // Grammar: Original order of normal exercises; no Diff corner.
@@ -132,7 +152,7 @@ const GRAMMAR=[
    'She has already made a phone call.',
    'She has already written a message.'
   ]},
-  {title:'3 · What has happened? Write six sentences in the present perfect',intro:'Look at the picture. What has happened? Write six sentences in the present perfect. You can use these verbs.',open:[
+  {title:'3 · What has happened? Write six sentences in the present perfect',intro:'Use these verbs in order: fall off · hurt · come · arrive · put · take. Example: There has been an accident. Die Bildaufgabe wird hier mit Satzhinweisen geübt.',open:[
    'A boy has fallen off his bike.',
    'He has hurt his leg.',
    'Two police officers have come.',
@@ -190,14 +210,8 @@ function grammarRender(st,task,checked=false,reveal=false){
   const t=GRAMMAR[st].tasks[task],values=grammarRead(st,task),isOpen=!!t.open;
  const inputStyle='box-sizing:border-box;display:inline-block;vertical-align:middle;max-width:190px;width:43vw;min-width:100px;min-height:38px;margin:3px 4px;padding:6px 8px;border-radius:8px;background:#fff;color:#17152b;font-size:16px;line-height:1.3';
  let content='';
-  if(st===1&&task===2){
-   const verbs=['be ✓','fall off','hurt','come','arrive','put','take'];
-   const tiles=`<div style="display:flex;flex-wrap:wrap;gap:7px;margin:12px 0">${verbs.map(v=>`<span style="background:#e5e7eb;color:#17152b;border-radius:7px;padding:7px 12px;font-weight:600">${esc(v)}</span>`).join('')}</div>`;
-   const picture='<img src="./unfall-station2.jpg" alt="Unfall mit Fahrrad, Krankenwagen, Polizei und Hunden" style="display:block;width:100%;height:auto;border-radius:8px;margin:12px 0">';
-   const example='<p><strong>Example:</strong> There has been an accident.</p>';
-   content=picture+tiles+example+t.open.map((answer,i)=>`<div style="margin:14px 0"><label style="display:block;margin-bottom:5px"><strong>${i+1}.</strong> Write a sentence:</label><textarea data-grammar="${i}" rows="2" spellcheck="false" style="box-sizing:border-box;width:100%;max-width:100%;padding:9px;border-radius:8px;font-size:16px;background:white;color:#17152b">${esc(values[i]||'')}</textarea>${reveal?`<p class="muted">Musterlösung: <strong>${esc(answer)}</strong></p>`:''}</div>`).join('');
-  }else if(t.items){
-   content=t.items.map(([before,after,answers],i)=>{
+ if(t.items){
+  content=t.items.map(([before,after,answers],i)=>{
    const val=String(values[i]||''),ok=answers.some(a=>grammarNormalize(a)===grammarNormalize(val));
    return `<div style="margin:12px 0;line-height:1.85;overflow-wrap:break-word"><strong>${i+1}.</strong> ${esc(before)}<input data-grammar="${i}" aria-label="Aufgabe ${i+1}" autocomplete="off" autocapitalize="none" spellcheck="false" value="${esc(val)}" style="${inputStyle};border:2px solid ${checked?(ok?'#6ee7a8':'#ff8d8d'):'#8c86bd'}">${esc(after)}${reveal&&!ok?`<div style="color:#ffb0b0;font-weight:600">Lösung: ${esc(answers.join(' / '))}</div>`:''}</div>`;
   }).join('');
@@ -205,9 +219,9 @@ function grammarRender(st,task,checked=false,reveal=false){
   content=t.open.map((example,i)=>`<div style="margin:14px 0"><label style="display:block;margin-bottom:5px"><strong>${i+1}.</strong> ${esc(t.prompts?.[i]||'Schreibe einen vollständigen englischen Satz.')}</label><textarea data-grammar="${i}" rows="2" spellcheck="false" style="box-sizing:border-box;width:100%;max-width:100%;padding:9px;border-radius:8px;font-size:16px;background:white;color:#17152b">${esc(values[i]||'')}</textarea>${reveal?`<p class="muted">Musterlösung: <strong>${esc(example)}</strong></p>`:''}</div>`).join('');
  }
  const total=t.items?.length||t.open.length,correct=t.items?t.items.filter((x,i)=>x[2].some(a=>grammarNormalize(a)===grammarNormalize(values[i]))).length:0;
- app.innerHTML=card(`<h2>📘 ${esc(GRAMMAR[st].title)}</h2><h3>${esc(t.title)}</h3>${t.intro?`<p>${esc(t.intro)}</p>`:''}${t.example?`<p class="muted">Example: ${esc(t.example)}</p>`:''}<p class="muted">${isOpen?'Schreibe selbst. Über „💡 Lösung anzeigen“ kannst du die Musterlösungen ansehen; andere richtige Sätze sind möglich.':'Trage die richtige englische Form ein.'} Beim erneuten Öffnen beginnt die Übung mit leeren Feldern.</p>${checked?`<p class="good"><strong>${isOpen?'Deine Sätze sind gespeichert. Vergleiche sie bei Bedarf mit den Musterlösungen.':`${correct} von ${total} richtig. Verbessere die roten Felder selbst.`}</strong></p>`:''}${content}<div class="buttons">${btn(isOpen?'✅ Eingaben speichern':'✅ Antworten prüfen','grammarCheck')}${btn('💡 Lösung anzeigen','grammarReveal','alt')}${btn('🔄 Eingaben leeren','grammarClear','alt')}</div>`)+card(btn('Zur Aufgabenübersicht','grammarBack','alt'));
+ app.innerHTML=card(`<h2>📘 ${esc(GRAMMAR[st].title)}</h2><h3>${esc(t.title)}</h3>${t.intro?`<p>${esc(t.intro)}</p>`:''}${t.example?`<p class="muted">Example: ${esc(t.example)}</p>`:''}<p class="muted">${isOpen?'Schreibe selbst. Über „💡 Lösung anzeigen“ kannst du die Musterlösungen ansehen; andere richtige Sätze sind möglich.':'Trage die richtige englische Form ein.'} Beim erneuten Öffnen beginnt die Übung mit leeren Feldern.</p>${checked?`<p class="good"><strong>${isOpen?'Deine Sätze sind gespeichert. Vergleiche sie bei Bedarf mit den Musterlösungen.':`${correct} von ${total} richtig. Verbessere die roten Felder selbst.`}</strong></p>`:''}${content}${firstSummary('grammar',st+'_'+task,values,t.items?.map(x=>x[2])||null)}<div class="buttons">${btn(isOpen?'✅ Eingaben speichern':'✅ Antworten prüfen','grammarCheck')}${btn('💡 Lösung anzeigen','grammarReveal','alt')}${btn('🔄 Eingaben leeren','grammarClear','alt')}</div>`)+card(btn('Zur Aufgabenübersicht','grammarBack','alt'));
 }
-function grammarCheck(){if(grammarStation===null||grammarTask===null)return;grammarCollect();grammarRender(grammarStation,grammarTask,true);}
+function grammarCheck(){if(grammarStation===null||grammarTask===null)return;grammarCollect();const t=GRAMMAR[grammarStation].tasks[grammarTask];firstCapture('grammar',grammarStation+'_'+grammarTask,t.items?.map(x=>x[2])||null,grammarRead(grammarStation,grammarTask),GRAMMAR[grammarStation].title+' · '+t.title);grammarRender(grammarStation,grammarTask,true);}
 function grammarReveal(){if(grammarStation===null||grammarTask===null)return;grammarCollect();grammarRender(grammarStation,grammarTask,true,true);}
 function grammarClear(){if(grammarStation===null||grammarTask===null)return;grammarWrite(grammarStation,grammarTask,[]);grammarRender(grammarStation,grammarTask);}
 
@@ -257,7 +271,23 @@ async function answer(i){if(role!=='player'||room?.meta?.stage!=='question'||!ui
 // Wiederholungen geben keine zusätzlichen Punkte; alle Zustände bleiben lokal gespeichert.
 function cleanMistakes(v){const out={};if(!v||typeof v!=='object')return out;for(const [k,n] of Object.entries(v)){const i=Number(k);if(Number.isInteger(i)&&i>=0&&i<30&&Number.isFinite(Number(n))&&Number(n)>0)out[i]=Math.min(9999,Math.floor(Number(n)));}return out;}
 function mistakeRows(b,m){return Object.entries(cleanMistakes(m)).map(([idx,count])=>{const q=BATTLES[b]?.[Number(idx)];if(!q)return null;return {word:q.word||q.q,translation:q.options[q.correct],count,idx:Number(idx)};}).filter(Boolean).sort((a,b)=>b.count-a.count||a.word.localeCompare(b.word,'de'));}
-function showMyMistakes(){stopSoloHeartbeat();if(!soloName){soloChooseName();return;}const groups=[0,1,2].map(b=>{const entries=mistakeRows(b,soloSaved(b)?.mistakes);return `<h3>Battle ${b+1}</h3>${entries.length?entries.map(x=>`<div class="player"><strong>${esc(x.word)}</strong> – ${esc(x.translation)}<p class="muted">${x.count}× falsch beantwortet</p></div>`).join(''):'<p class="muted">Noch keine Fehler erfasst.</p>'}`;}).join('');app.innerHTML=card(`<h2>📕 ${esc(soloName)} · Meine Fehlerliste</h2><p>Die Fehler werden bei normalen Fragen und Wiederholungen gezählt. Frühere Battles vor diesem Update sind nicht rückwirkend enthalten.</p>${groups}`)+card(btn('Zur Battle-Auswahl','soloHome','alt'));}
+function firstMistakeSection(type,id,title,answers){
+ const r=firstRead(type,id);
+ if(!r)return `<div class="player"><strong>${esc(title)}</strong><p class="muted">Noch kein erster Versuch gespeichert.</p></div>`;
+ if(r.selfCheck){
+  const entered=(r.inputs||[]).filter(x=>String(x||'').trim()).length;
+  return `<div class="player"><strong>${esc(title)}</strong><p>${entered} von ${r.total} Sätzen im ersten Versuch ausgefüllt · Selbstkontrolle</p><details><summary>Erste Antworten ansehen</summary>${(r.inputs||[]).map((x,i)=>`<p><strong>${i+1}.</strong> ${esc(x||'(leer)')}</p>`).join('')}</details></div>`;
+ }
+ const mistakes=Array.isArray(r.errors)?r.errors:[];
+ return `<div class="player"><strong>${esc(title)}</strong><p>Erster Versuch: ${Number(r.correct)||0} von ${r.total} richtig · ${mistakes.length} Fehler</p>${mistakes.length?`<details><summary>Fehler ansehen (${mistakes.length})</summary>${mistakes.map(x=>`<p><strong>Nr. ${Number(x.position)}:</strong> ${esc(x.answer||'(leer)')} → <strong>${esc(x.correct||'')}</strong></p>`).join('')}</details>`:'<p class="good">Alles richtig! 🎉</p>'}</div>`;
+}
+function showMyMistakes(){
+ stopSoloHeartbeat();if(!soloName){soloChooseName();return;}
+ const battles=[0,1,2].map(b=>{const entries=mistakeRows(b,soloSaved(b)?.mistakes);return `<h3>Battle ${b+1}</h3>${entries.length?entries.map(x=>`<div class="player"><strong>${esc(x.word)}</strong> – ${esc(x.translation)}<p class="muted">${x.count}× falsch beantwortet</p></div>`).join(''):'<p class="muted">Noch keine Fehler erfasst.</p>'}`;}).join('');
+ const grammar=GRAMMAR.map((st,si)=>`<h3>Grammatik · Station ${si+1}</h3>${st.tasks.map((t,ti)=>firstMistakeSection('grammar',si+'_'+ti,t.title,t.items?.map(x=>x[2])||null)).join('')}`).join('');
+ const gaps=GAP_SETS.map((set,i)=>firstMistakeSection('gap',i,set.title,gapFields(i))).join('');
+ app.innerHTML=card(`<h2>📕 ${esc(soloName)} · Meine Fehlerliste</h2><p>Alle Fehler aus Battles sowie die ersten kontrollierten Versuche bei Grammatik und Lückentexten. Grammatik- und Lückentextdaten sind nur auf diesem Gerät gespeichert.</p><h2>🎮 Battles</h2>${battles}<h2>📘 Grammatik</h2>${grammar}<h2>✍️ Lückentexte</h2>${gaps}`)+card(btn('Zur Battle-Auswahl','soloHome','alt'));
+}
 function soloKey(b){return `${key}_${soloName}_battle_${b+1}`;}
 function soloSave(){if(!solo)return;localStorage.setItem(soloKey(solo.battle),JSON.stringify(solo));void syncSolo();}
 function soloSaved(b){try{const s=JSON.parse(localStorage.getItem(soloKey(b))||'null');if(!s||s.battle!==b||!Number.isInteger(s.index)||s.index<0||s.index>30||!Number.isFinite(s.score))return null;
@@ -333,107 +363,3 @@ document.addEventListener('change',e=>{if(e.target.matches('[data-grammar]'))gra
 document.addEventListener('focusout',e=>{if(e.target.matches('[data-grammar]'))grammarCollect();});
 window.addEventListener('pagehide',()=>grammarCollect());
 home();try{const fb=initializeApp(firebaseConfig),auth=getAuth(fb);db=getDatabase(fb);onAuthStateChanged(auth,u=>{if(u)uid=u.uid;else signInAnonymously(auth).catch(e=>msg('Anmeldung fehlgeschlagen: '+e.message,true));});}catch(e){msg('Firebase-Konfiguration fehlerhaft: '+e.message,true);}
-// Lokale Speicherung des ersten kontrollierten Versuchs
-(function () {
-  const prefix = 'vb2first_';
-  const norm = s => String(s ?? '').trim().toLowerCase()
-    .replace(/[’‘]/g, "'").replace(/\s+/g, ' ');
-  const safe = s => String(s ?? '').replace(/[&<>"']/g,
-    c => ({'&':'&amp;','<':'&lt;','>':'&gt;',
-      '"':'&quot;',"'":'&#39;'}[c]));
-  const read = k => {
-    try { return JSON.parse(localStorage.getItem(k) || 'null'); }
-    catch { return null; }
-  };
-  const key = (type,id) =>
-    prefix + soloName + '_' + type + '_' + id;
-
-  function evaluate(type,id) {
-    let answers, inputs, title;
-    if (type === 'gap') {
-      const set = GAP_SETS[id];
-      if (!set) return null;
-      answers = set.groups.flatMap(g => g.answers);
-      inputs = [...document.querySelectorAll('[data-gap]')]
-        .map(e => e.value);
-      title = set.title;
-    } else {
-      const [st,task] = id.split('_').map(Number);
-      const t = GRAMMAR[st]?.tasks[task];
-      if (!t) return null;
-      answers = t.items?.map(x => x[2]) || null;
-      inputs = [...document.querySelectorAll('[data-grammar]')]
-        .map(e => e.value);
-      title = GRAMMAR[st].title + ' · ' + t.title;
-    }
-    if (!inputs.length) return null;
-    const errors = answers ? inputs.map((answer,i) => ({
-      position:i+1, answer,
-      correct:answers[i]?.join(' / ') || '',
-      ok:(answers[i] || []).some(a => norm(a) === norm(answer))
-    })).filter(x => !x.ok) : [];
-    return {
-      title, total:inputs.length,
-      correct:answers ? inputs.length-errors.length : null,
-      errors, inputs, checkedAt:Date.now(),
-      selfCheck:!answers
-    };
-  }
-
-  function show(type,id) {
-    const first = read(key(type,id));
-    const current = evaluate(type,id);
-    if (!first || !current) return;
-    document.getElementById('first-try-summary')?.remove();
-
-    const box = document.createElement('div');
-    box.id = 'first-try-summary';
-    box.style = 'margin:16px 0;padding:14px;border:1px solid #8c86bd;border-radius:12px';
-
-    const score = x => x.selfCheck
-      ? 'Freie Sätze – selbst kontrollieren'
-      : x.correct + ' von ' + x.total + ' richtig';
-
-    const mistakes = first.selfCheck
-      ? '<p>Freie Sätze werden nicht automatisch bewertet.</p>'
-      : first.errors.length
-        ? '<details><summary>Fehler des ersten Versuchs (' +
-          first.errors.length + ')</summary>' +
-          first.errors.map(x =>
-            '<p><strong>Nr. ' + x.position + ':</strong> ' +
-            safe(x.answer || '(leer)') + ' → ' +
-            safe(x.correct) + '</p>'
-          ).join('') + '</details>'
-        : '<p>Beim ersten Versuch war alles richtig! 🎉</p>';
-
-    box.innerHTML =
-      '<h3>📋 Dein Lernverlauf</h3>' +
-      '<p><strong>Erster Versuch:</strong> ' + score(first) + '</p>' +
-      '<p><strong>Aktueller Stand:</strong> ' + score(current) + '</p>' +
-      mistakes +
-      '<p>Der erste Versuch bleibt auf diesem Handy gespeichert.</p>';
-
-    app.querySelector('.card')?.appendChild(box);
-  }
-
-  function capture(type,id) {
-    if (!soloName) return;
-    const result = evaluate(type,id);
-    if (!result) return;
-    const k = key(type,id);
-    if (!read(k)) {
-      localStorage.setItem(k,JSON.stringify(result));
-    }
-    localStorage.setItem(k+'_latest',JSON.stringify(result));
-    setTimeout(() => show(type,id),0);
-  }
-
-  document.addEventListener('click',e => {
-    const action = e.target.closest('[data-action]')?.dataset.action;
-    if (action === 'gapCheck' && gapStation !== null)
-      capture('gap',gapStation);
-    if (action === 'grammarCheck' &&
-        grammarStation !== null && grammarTask !== null)
-      capture('grammar',grammarStation+'_'+grammarTask);
-  },true);
-})();
