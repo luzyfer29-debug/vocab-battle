@@ -110,7 +110,7 @@ const GRAMMAR=[
    ['We made ',' pizza for dinner.',['ourselves']],
    ['Laura and her friend haven’t seen ',' for a long time.',['each other']]
   ]},
-  {title:'4 · Write four sentences about rugby',intro:'Use adjectives and adverbs. Wörter: popular · fast · quick · slow · easy · safe',starts:['Rugby','It is','The players','You can'],open:[
+  {title:'4 · Write four sentences about rugby',intro:'Use adjectives and adverbs. Wörter: popular · fast · quick · slow · easy · safe',open:[
    'Rugby is a popular sport.', 'It is a fast sport too.',
    'The players must run quickly.', 'You can learn the rules easily.'
   ]}
@@ -124,7 +124,7 @@ const GRAMMAR=[
    ['Two women have ',' (sprain) their ankles.',['sprained']],
    ['Three men have ',' (hurt) their heads.',['hurt']]
   ]},
-  {title:'2 · Megan works for the emergency services. Make sentences',intro:'What has she already done today? Make sentences. Use the present perfect.',image:'megan-station2.jpg',prompts:['work on the computer','open the window','hang up her uniform','drink tea','make a phone call','write a message'],starts:['Megan has already'],open:[
+  {title:'2 · Megan works for the emergency services. Make sentences',intro:'Use the present perfect. Vorgaben in Arbeitsblatt-Reihenfolge: work on the computer · open the window · hang up her uniform · drink tea · make a phone call · write a message.',open:[
    'Megan has already worked on the computer.',
    'She has already opened the window.',
    'She has already hung up her uniform.',
@@ -132,7 +132,7 @@ const GRAMMAR=[
    'She has already made a phone call.',
    'She has already written a message.'
   ]},
-  {title:'3 · What has happened? Write six sentences in the present perfect',intro:'Look at the picture. What has happened? Write six sentences in the present perfect. You can use these verbs.',image:'unfall-station2.jpg',prompts:['be ✓','fall off','hurt','come','arrive','put','take'],example:'There has been an accident.',open:[
+  {title:'3 · What has happened? Write six sentences in the present perfect',intro:'Look at the picture. What has happened? Write six sentences in the present perfect. You can use these verbs.',open:[
    'A boy has fallen off his bike.',
    'He has hurt his leg.',
    'Two police officers have come.',
@@ -190,14 +190,19 @@ function grammarRender(st,task,checked=false,reveal=false){
   const t=GRAMMAR[st].tasks[task],values=grammarRead(st,task),isOpen=!!t.open;
  const inputStyle='box-sizing:border-box;display:inline-block;vertical-align:middle;max-width:190px;width:43vw;min-width:100px;min-height:38px;margin:3px 4px;padding:6px 8px;border-radius:8px;background:#fff;color:#17152b;font-size:16px;line-height:1.3';
  let content='';
- if(t.items){
-  content=t.items.map(([before,after,answers],i)=>{
+  if(st===1&&task===2){
+   const verbs=['be ✓','fall off','hurt','come','arrive','put','take'];
+   const tiles=`<div style="display:flex;flex-wrap:wrap;gap:7px;margin:12px 0">${verbs.map(v=>`<span style="background:#e5e7eb;color:#17152b;border-radius:7px;padding:7px 12px;font-weight:600">${esc(v)}</span>`).join('')}</div>`;
+   const picture='<img src="./unfall-station2.jpg" alt="Unfall mit Fahrrad, Krankenwagen, Polizei und Hunden" style="display:block;width:100%;height:auto;border-radius:8px;margin:12px 0">';
+   const example='<p><strong>Example:</strong> There has been an accident.</p>';
+   content=picture+tiles+example+t.open.map((answer,i)=>`<div style="margin:14px 0"><label style="display:block;margin-bottom:5px"><strong>${i+1}.</strong> Write a sentence:</label><textarea data-grammar="${i}" rows="2" spellcheck="false" style="box-sizing:border-box;width:100%;max-width:100%;padding:9px;border-radius:8px;font-size:16px;background:white;color:#17152b">${esc(values[i]||'')}</textarea>${reveal?`<p class="muted">Musterlösung: <strong>${esc(answer)}</strong></p>`:''}</div>`).join('');
+  }else if(t.items){
+   content=t.items.map(([before,after,answers],i)=>{
    const val=String(values[i]||''),ok=answers.some(a=>grammarNormalize(a)===grammarNormalize(val));
    return `<div style="margin:12px 0;line-height:1.85;overflow-wrap:break-word"><strong>${i+1}.</strong> ${esc(before)}<input data-grammar="${i}" aria-label="Aufgabe ${i+1}" autocomplete="off" autocapitalize="none" spellcheck="false" value="${esc(val)}" style="${inputStyle};border:2px solid ${checked?(ok?'#6ee7a8':'#ff8d8d'):'#8c86bd'}">${esc(after)}${reveal&&!ok?`<div style="color:#ffb0b0;font-weight:600">Lösung: ${esc(answers.join(' / '))}</div>`:''}</div>`;
   }).join('');
  }else{
-  if(t.image)content+=`<img src="${esc(t.image)}" alt="Bild zur Grammatikaufgabe" style="display:block;width:100%;max-width:480px;height:auto;margin:12px auto;border-radius:8px"><p><strong>Wortvorgaben:</strong></p><div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(135px,1fr));gap:8px;margin:10px 0 20px">${t.prompts.map(p=>`<div style="padding:10px;border:1px solid #8c86bd;border-radius:8px">${esc(p)}</div>`).join('')}</div>`;
-  content+=t.open.map((example,i)=>`<div style="margin:14px 0"><label style="display:block;margin-bottom:5px"><strong>${i+1}.</strong> ${t.starts?.[i]?`<strong>${esc(t.starts[i])}</strong> <span class="muted">– hier weiterschreiben:</span>`:esc(t.image?'Schreibe einen vollständigen englischen Satz.':t.prompts?.[i]||'Schreibe einen vollständigen englischen Satz.')}</label><textarea data-grammar="${i}" rows="2" spellcheck="false" style="box-sizing:border-box;width:100%;max-width:100%;padding:9px;border-radius:8px;font-size:16px;background:white;color:#17152b">${esc(values[i]||'')}</textarea>${reveal?`<p class="muted">Musterlösung: <strong>${esc(example)}</strong></p>`:''}</div>`).join('');
+  content=t.open.map((example,i)=>`<div style="margin:14px 0"><label style="display:block;margin-bottom:5px"><strong>${i+1}.</strong> ${esc(t.prompts?.[i]||'Schreibe einen vollständigen englischen Satz.')}</label><textarea data-grammar="${i}" rows="2" spellcheck="false" style="box-sizing:border-box;width:100%;max-width:100%;padding:9px;border-radius:8px;font-size:16px;background:white;color:#17152b">${esc(values[i]||'')}</textarea>${reveal?`<p class="muted">Musterlösung: <strong>${esc(example)}</strong></p>`:''}</div>`).join('');
  }
  const total=t.items?.length||t.open.length,correct=t.items?t.items.filter((x,i)=>x[2].some(a=>grammarNormalize(a)===grammarNormalize(values[i]))).length:0;
  app.innerHTML=card(`<h2>📘 ${esc(GRAMMAR[st].title)}</h2><h3>${esc(t.title)}</h3>${t.intro?`<p>${esc(t.intro)}</p>`:''}${t.example?`<p class="muted">Example: ${esc(t.example)}</p>`:''}<p class="muted">${isOpen?'Schreibe selbst. Über „💡 Lösung anzeigen“ kannst du die Musterlösungen ansehen; andere richtige Sätze sind möglich.':'Trage die richtige englische Form ein.'} Beim erneuten Öffnen beginnt die Übung mit leeren Feldern.</p>${checked?`<p class="good"><strong>${isOpen?'Deine Sätze sind gespeichert. Vergleiche sie bei Bedarf mit den Musterlösungen.':`${correct} von ${total} richtig. Verbessere die roten Felder selbst.`}</strong></p>`:''}${content}<div class="buttons">${btn(isOpen?'✅ Eingaben speichern':'✅ Antworten prüfen','grammarCheck')}${btn('💡 Lösung anzeigen','grammarReveal','alt')}${btn('🔄 Eingaben leeren','grammarClear','alt')}</div>`)+card(btn('Zur Aufgabenübersicht','grammarBack','alt'));
