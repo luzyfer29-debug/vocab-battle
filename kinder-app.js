@@ -232,24 +232,35 @@ const key='vb2solo';
 const SOLO_NAMES=['Luca','Semir','Talea','Nele'];
 let soloName=localStorage.getItem('vb2solo_name')||'';
 let dashboardUnsubscribe=null,soloHeartbeat=null;
-function resetStamp(name){return Math.max(Number(resetState.all)||0,Number(resetState[name])||0);}
-function clearLocalLearning(name){
- const prefixes=[`vb2solo_${name}_battle_`,`vb2first_${name}_`,`vb2grammar_${name}_`,`vb2gap_${name}_`,`vb2math_${name}_battle_`];
+function resetStamp(name,subject='english'){
+ return Math.max(Number(resetState.all)||0,Number(resetState[name])||0,Number(resetState[`${subject}_${name}`])||0);
+}
+function clearLocalLearning(name,subject){
+ const prefixes=subject==='math'?[`vb2math_${name}_battle_`]:[`vb2solo_${name}_battle_`,`vb2first_${name}_`,`vb2grammar_${name}_`,`vb2gap_${name}_`];
  for(let i=localStorage.length-1;i>=0;i--){const k=localStorage.key(i);if(k&&prefixes.some(p=>k.startsWith(p)))localStorage.removeItem(k);}
- if(mathName===name)mathRun=null;if(soloName===name){solo=null;stopSoloHeartbeat();grammarStation=null;grammarTask=null;gapStation=null;}
+ if(subject==='math'&&mathName===name)mathRun=null;
+ if(subject==='english'&&soloName===name){solo=null;stopSoloHeartbeat();grammarStation=null;grammarTask=null;gapStation=null;}
 }
 function applyResetState(state){
  resetState=state&&typeof state==='object'?state:{};
- let activeWasReset=false;
+ let activeEnglish=false,activeMath=false;
  for(const name of SOLO_NAMES){
-  const stamp=resetStamp(name),seenKey=`vb2reset_seen_${name}`;
-  if(stamp>Number(localStorage.getItem(seenKey)||0)){
-   clearLocalLearning(name);localStorage.setItem(seenKey,String(stamp));
-   if(soloName===name)activeWasReset=true;
+  for(const subject of ['english','math']){
+   const stamp=resetStamp(name,subject),seenKey=`vb2reset_seen_${subject}_${name}`;
+   // Preserve previous legacy reset acknowledgement when upgrading.
+   const oldSeen=Number(localStorage.getItem(`vb2reset_seen_${name}`)||0);
+   const seen=Math.max(Number(localStorage.getItem(seenKey)||0),oldSeen);
+   if(stamp>seen){
+    clearLocalLearning(name,subject);
+    localStorage.setItem(seenKey,String(stamp));
+    if(subject==='english'&&soloName===name)activeEnglish=true;
+    if(subject==='math'&&mathName===name)activeMath=true;
+   }
   }
  }
  resetReady=true;
- if(activeWasReset){soloHome();msg('Lernstände und Fehlerlisten wurden zurückgesetzt.');}
+ if(activeMath&&mathName){mathHome();msg('Mathe-Lernstand zurückgesetzt. Englisch bleibt erhalten.');}
+ else if(activeEnglish&&soloName){soloHome();msg('Englisch-Lernstand zurückgesetzt. Mathe bleibt erhalten.');}
 }
 function watchResets(){
  if(resetUnsubscribe){resetUnsubscribe();resetUnsubscribe=null;}
@@ -333,7 +344,7 @@ async function syncSolo(){
   // Always check the current server reset before uploading old work.
   const rs=await get(ref(db,'learningResets'));
   applyResetState(rs.val());
-  if(!resetReady||solo!==currentSolo||soloName!==name||savedAt<=resetStamp(name))return;
+  if(!resetReady||solo!==currentSolo||soloName!==name||savedAt<=resetStamp(name,'english'))return;
   await set(ref(db,`soloProgress/${device}/${name}/battle${currentSolo.battle+1}`),{
    name,battle:currentSolo.battle+1,done:currentSolo.index,
    correct:Math.floor(currentSolo.score/10),score:currentSolo.score,
@@ -406,7 +417,16 @@ let mathName='',mathRun=null,mathView='';
 const mathKey=(n,b)=>`vb2math_${n}_battle_${b+1}`;
 function mathLoad(n,b){try{return JSON.parse(localStorage.getItem(mathKey(n,b))||'null');}catch{return null;}}
 function mathSave(){if(!mathRun)return;mathRun.updatedAt=Date.now();localStorage.setItem(mathKey(mathName,mathRun.b),JSON.stringify(mathRun));void mathSync();}
-async function mathSync(){if(!db||!uid||!mathRun||!mathName)return;try{const stamp=Math.max(Number(resetState?.all)||0,Number(resetState?.[mathName])||0);if(mathRun.updatedAt<=stamp)return;await set(ref(db,`mathProgress/${uid}/${mathName}/battle${mathRun.b+1}`),{done:mathRun.index,score:mathRun.score,mistakes:mathRun.mistakes,updatedAt:mathRun.updatedAt,finished:mathRun.finished});}catch(e){msg('Mathe online noch nicht verfügbar – der Fortschritt bleibt auf diesem Gerät gespeichert.',true);}}
+async function mathSync(){
+ if(!db||!uid||!mathRun||!mathName||!resetReady)return;
+ const currentRun=mathRun,name=mathName,device=uid,savedAt=Number(mathRun.updatedAt)||0;
+ try{
+  const rs=await get(ref(db,'learningResets'));
+  applyResetState(rs.val());
+  if(!resetReady||mathRun!==currentRun||mathName!==name||savedAt<=resetStamp(name,'math'))return;
+  await set(ref(db,`mathProgress/${device}/${name}/battle${currentRun.b+1}`),{done:currentRun.index,score:currentRun.score,mistakes:currentRun.mistakes,updatedAt:savedAt,finished:!!currentRun.finished});
+ }catch(e){msg('Mathe online noch nicht verfügbar – der Fortschritt bleibt auf diesem Gerät gespeichert.',true);}
+}
 function mathChoose(){mathRun=null;app.innerHTML=card('<h2>🔢 Mathe · Klasse 7 NRW</h2><p>Rationale Zahlen – wer lernt?</p>'+SOLO_NAMES.map((n,i)=>btn(esc(n),`mathName${i}`)).join(''))+card(btn('Zur Fächerauswahl','home','alt'));}
 function mathSetName(i){mathName=SOLO_NAMES[i];mathHome();}
 function mathHome(){mathRun=null;const titles=['Zahlen vergleichen, addieren und subtrahieren','Multiplizieren und dividieren','Klammern und gemischte Rechnungen'];app.innerHTML=card(`<h2>🔢 Mathe · ${esc(mathName)}</h2><p>Klasse 7 · Rationale Zahlen</p>`+titles.map((t,b)=>{const s=mathLoad(mathName,b);return `<div class="player"><h3>Battle ${b+1}</h3><p>${esc(t)}</p><p>${s?.index||0}/30 Aufgaben · ${s?.score||0} Punkte</p>${btn('Neu beginnen',`mathStart${b}`)}${s&&!s.finished?btn('Fortsetzen',`mathResume${b}`,'alt'):''}</div>`;}).join('')+btn('📕 Meine Mathe-Fehlerliste','mathMistakes','alt'))+card(btn('Fach wechseln','home','alt'));}
