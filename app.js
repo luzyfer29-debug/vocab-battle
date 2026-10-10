@@ -22,6 +22,7 @@ async function adminLogout(){try{await signOut(authClient);adminLoggedIn=false;u
 const SOLO_NAMES=['Luca','Semir','Talea','Nele'];
 let soloName=localStorage.getItem('vb2solo_name')||'';
 let dashboardUnsubscribe=null,soloHeartbeat=null;
+let resetBusy=false;
 function stopSoloHeartbeat(){if(soloHeartbeat!==null){clearInterval(soloHeartbeat);soloHeartbeat=null;}}
 function startSoloHeartbeat(){stopSoloHeartbeat();soloHeartbeat=setInterval(()=>{if(solo&&soloName)void syncSolo();},30000);}
 function stopDashboard(){if(dashboardUnsubscribe){dashboardUnsubscribe();dashboardUnsubscribe=null;}}
@@ -130,7 +131,32 @@ function renderDashboard(entries){
   }).join('');
   return `<details style="margin:12px 0;padding:12px;background:rgba(255,255,255,.06);border-radius:12px"><summary><strong>${esc(name)}</strong> ${recent?'🟢':'⚪'} · Details und Fehlerliste ansehen</summary>${records.map((v,i)=>`<p><strong>Battle ${i+1}:</strong> ${v?`${Math.min(30,Number(v.done)||0)}/30 erledigt · ${Number(v.correct)||0} richtig · ${Number(v.score)||0} Punkte · zuletzt ${v.updatedAt?new Date(v.updatedAt).toLocaleString('de-DE'):'–'}`:'Noch keine Online-Daten'}</p>`).join('')}<h3>📕 Fehlerliste</h3>${errors}</details>`;
  }).join('');
- app.innerHTML=card('<h2>📊 Live-Lernübersicht</h2><p>Alle vier Kinder auf einen Blick. In den Battle-Spalten steht: erledigte Fragen / 30 · Punkte. 🟢 bedeutet Aktivität in den letzten 90 Sekunden.</p>'+table+'<p class="muted">Wische die Tabelle seitlich, um alle Spalten zu sehen.</p><h3>Einzelheiten</h3>'+detailRows)+card(btn('Zurück','home','alt'));
+ app.innerHTML=card('<h2>📊 Live-Lernübersicht</h2><p>Alle vier Kinder auf einen Blick. In den Battle-Spalten steht: erledigte Fragen / 30 · Punkte. 🟢 bedeutet Aktivität in den letzten 90 Sekunden.</p>'+table+'<p class="muted">Wische die Tabelle seitlich, um alle Spalten zu sehen.</p><h3>Einzelheiten</h3>'+detailRows)+card('<h2>🗑️ Lernstände zurücksetzen</h2><p>Nur für den Schiedsrichter. Wähle ein Kind oder alle vier aus.</p><label>Auswahl<select id="reset-target"><option value="Luca">Luca</option><option value="Semir">Semir</option><option value="Talea">Talea</option><option value="Nele">Nele</option><option value="all">Alle vier Kinder</option></select></label>'+btn('🗑️ Lernstände zurücksetzen','resetLearning'))+card(btn('Zurück','home','alt'));
+}
+async function resetLearning(){
+ if(resetBusy||!adminLoggedIn||uid!==ADMIN_UID){msg('Nur der Schiedsrichter darf Lernstände löschen.',true);return;}
+ const target=document.querySelector('#reset-target')?.value;
+ if(target!=='all'&&!SOLO_NAMES.includes(target)){msg('Bitte ein Kind auswählen.',true);return;}
+ const label=target==='all'?'ALLE VIER KINDER':target;
+ if(!window.confirm(`ACHTUNG: Online-Lernstände und Fehlerlisten für ${label} löschen? Dies kann nicht rückgängig gemacht werden.`))return;
+ if(!window.confirm(`Wirklich endgültig zurücksetzen: ${label}?`))return;
+ resetBusy=true;
+ try{
+  // First broadcast the reset so updated child clients clear local data.
+  const targets=target==='all'?SOLO_NAMES:[target];
+  const stamp=Date.now();
+  for(const name of targets)await set(ref(db,`learningResets/${name}`),stamp);
+  // Delete the corresponding historical progress across every device UID.
+  const snap=await get(ref(db,'soloProgress'));
+  const entries=snap.val()||{};
+  const paths={};
+  for(const [device,perDevice] of Object.entries(entries)){
+   for(const name of targets){if(perDevice&&Object.prototype.hasOwnProperty.call(perDevice,name))paths[`${device}/${name}`]=null;}
+  }
+  if(Object.keys(paths).length)await update(ref(db,'soloProgress'),paths);
+  msg(`Online-Lernstände für ${label} gelöscht. Die Kindergeräte müssen die aktuelle App-Version öffnen, damit auch lokale Fehlerlisten gelöscht werden.`);
+ }catch(e){msg('Rücksetzen nicht vollständig abgeschlossen: '+e.message,true);}
+ finally{resetBusy=false;}
 }
 function showDashboard(){
  if(!adminLoggedIn||uid!==ADMIN_UID){loginForm();return;}
@@ -139,5 +165,5 @@ function showDashboard(){
  if(!uid){msg('Bitte kurz warten, bis die Anmeldung abgeschlossen ist.',true);return;}
  dashboardUnsubscribe=onValue(ref(db,'soloProgress'),snap=>{renderDashboard(snap.val());},e=>msg('Lernübersicht konnte nicht geladen werden: '+e.message,true));
 }
-document.addEventListener('click',e=>{const a=e.target.closest('[data-action]'),ans=e.target.closest('[data-answer]'),sa=e.target.closest('[data-soloanswer]');if(ans){answer(Number(ans.dataset.answer));return;}if(sa){soloAnswer(Number(sa.dataset.soloanswer));return;}if(!a)return;const v=a.dataset.action;if(v==='home')home();else if(v==='adminForm')loginForm();else if(v==='adminLogin')void adminLogin();else if(v==='adminLogout')void adminLogout();else if(v==='host')chooseBattle();else if(v==='createRoom')void makeRoom();else if(v==='join')joinForm();else if(v==='enter')enter();else if(['start','reset'].includes(v))hostAction(v);else if(v==='solo')soloChooseName();else if(v==='dashboard')void showDashboard();else if(v==='soloChangeName')soloChooseName();else if(v==='soloMistakes')showMyMistakes();else if(v==='soloHome')soloHome();else if(/^soloName[0-3]$/.test(v))soloSetName(Number(v.slice(-1)));else if(/^soloStart[012]$/.test(v))soloStart(Number(v.slice(-1)));else if(/^soloResume[012]$/.test(v))soloResume(Number(v.slice(-1)));else if(v==='soloNext')soloNext();});
+document.addEventListener('click',e=>{const a=e.target.closest('[data-action]'),ans=e.target.closest('[data-answer]'),sa=e.target.closest('[data-soloanswer]');if(ans){answer(Number(ans.dataset.answer));return;}if(sa){soloAnswer(Number(sa.dataset.soloanswer));return;}if(!a)return;const v=a.dataset.action;if(v==='home')home();else if(v==='adminForm')loginForm();else if(v==='adminLogin')void adminLogin();else if(v==='adminLogout')void adminLogout();else if(v==='host')chooseBattle();else if(v==='createRoom')void makeRoom();else if(v==='join')joinForm();else if(v==='enter')enter();else if(['start','reset'].includes(v))hostAction(v);else if(v==='solo')soloChooseName();else if(v==='dashboard')void showDashboard();else if(v==='resetLearning')void resetLearning();else if(v==='soloChangeName')soloChooseName();else if(v==='soloMistakes')showMyMistakes();else if(v==='soloHome')soloHome();else if(/^soloName[0-3]$/.test(v))soloSetName(Number(v.slice(-1)));else if(/^soloStart[012]$/.test(v))soloStart(Number(v.slice(-1)));else if(/^soloResume[012]$/.test(v))soloResume(Number(v.slice(-1)));else if(v==='soloNext')soloNext();});
 home();try{const fb=initializeApp(firebaseConfig),auth=getAuth(fb);authClient=auth;db=getDatabase(fb);onAuthStateChanged(auth,u=>{const wasAdmin=adminLoggedIn;uid=u?.uid||'';adminLoggedIn=!!u&&u.uid===ADMIN_UID;if(wasAdmin!==adminLoggedIn)home();if(!u)signInAnonymously(auth).catch(e=>msg('Anmeldung fehlgeschlagen: '+e.message,true));});}catch(e){msg('Firebase-Konfiguration fehlerhaft: '+e.message,true);}
