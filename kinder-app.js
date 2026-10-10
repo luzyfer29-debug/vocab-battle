@@ -333,3 +333,107 @@ document.addEventListener('change',e=>{if(e.target.matches('[data-grammar]'))gra
 document.addEventListener('focusout',e=>{if(e.target.matches('[data-grammar]'))grammarCollect();});
 window.addEventListener('pagehide',()=>grammarCollect());
 home();try{const fb=initializeApp(firebaseConfig),auth=getAuth(fb);db=getDatabase(fb);onAuthStateChanged(auth,u=>{if(u)uid=u.uid;else signInAnonymously(auth).catch(e=>msg('Anmeldung fehlgeschlagen: '+e.message,true));});}catch(e){msg('Firebase-Konfiguration fehlerhaft: '+e.message,true);}
+// Lokale Speicherung des ersten kontrollierten Versuchs
+(function () {
+  const prefix = 'vb2first_';
+  const norm = s => String(s ?? '').trim().toLowerCase()
+    .replace(/[’‘]/g, "'").replace(/\s+/g, ' ');
+  const safe = s => String(s ?? '').replace(/[&<>"']/g,
+    c => ({'&':'&amp;','<':'&lt;','>':'&gt;',
+      '"':'&quot;',"'":'&#39;'}[c]));
+  const read = k => {
+    try { return JSON.parse(localStorage.getItem(k) || 'null'); }
+    catch { return null; }
+  };
+  const key = (type,id) =>
+    prefix + soloName + '_' + type + '_' + id;
+
+  function evaluate(type,id) {
+    let answers, inputs, title;
+    if (type === 'gap') {
+      const set = GAP_SETS[id];
+      if (!set) return null;
+      answers = set.groups.flatMap(g => g.answers);
+      inputs = [...document.querySelectorAll('[data-gap]')]
+        .map(e => e.value);
+      title = set.title;
+    } else {
+      const [st,task] = id.split('_').map(Number);
+      const t = GRAMMAR[st]?.tasks[task];
+      if (!t) return null;
+      answers = t.items?.map(x => x[2]) || null;
+      inputs = [...document.querySelectorAll('[data-grammar]')]
+        .map(e => e.value);
+      title = GRAMMAR[st].title + ' · ' + t.title;
+    }
+    if (!inputs.length) return null;
+    const errors = answers ? inputs.map((answer,i) => ({
+      position:i+1, answer,
+      correct:answers[i]?.join(' / ') || '',
+      ok:(answers[i] || []).some(a => norm(a) === norm(answer))
+    })).filter(x => !x.ok) : [];
+    return {
+      title, total:inputs.length,
+      correct:answers ? inputs.length-errors.length : null,
+      errors, inputs, checkedAt:Date.now(),
+      selfCheck:!answers
+    };
+  }
+
+  function show(type,id) {
+    const first = read(key(type,id));
+    const current = evaluate(type,id);
+    if (!first || !current) return;
+    document.getElementById('first-try-summary')?.remove();
+
+    const box = document.createElement('div');
+    box.id = 'first-try-summary';
+    box.style = 'margin:16px 0;padding:14px;border:1px solid #8c86bd;border-radius:12px';
+
+    const score = x => x.selfCheck
+      ? 'Freie Sätze – selbst kontrollieren'
+      : x.correct + ' von ' + x.total + ' richtig';
+
+    const mistakes = first.selfCheck
+      ? '<p>Freie Sätze werden nicht automatisch bewertet.</p>'
+      : first.errors.length
+        ? '<details><summary>Fehler des ersten Versuchs (' +
+          first.errors.length + ')</summary>' +
+          first.errors.map(x =>
+            '<p><strong>Nr. ' + x.position + ':</strong> ' +
+            safe(x.answer || '(leer)') + ' → ' +
+            safe(x.correct) + '</p>'
+          ).join('') + '</details>'
+        : '<p>Beim ersten Versuch war alles richtig! 🎉</p>';
+
+    box.innerHTML =
+      '<h3>📋 Dein Lernverlauf</h3>' +
+      '<p><strong>Erster Versuch:</strong> ' + score(first) + '</p>' +
+      '<p><strong>Aktueller Stand:</strong> ' + score(current) + '</p>' +
+      mistakes +
+      '<p>Der erste Versuch bleibt auf diesem Handy gespeichert.</p>';
+
+    app.querySelector('.card')?.appendChild(box);
+  }
+
+  function capture(type,id) {
+    if (!soloName) return;
+    const result = evaluate(type,id);
+    if (!result) return;
+    const k = key(type,id);
+    if (!read(k)) {
+      localStorage.setItem(k,JSON.stringify(result));
+    }
+    localStorage.setItem(k+'_latest',JSON.stringify(result));
+    setTimeout(() => show(type,id),0);
+  }
+
+  document.addEventListener('click',e => {
+    const action = e.target.closest('[data-action]')?.dataset.action;
+    if (action === 'gapCheck' && gapStation !== null)
+      capture('gap',gapStation);
+    if (action === 'grammarCheck' &&
+        grammarStation !== null && grammarTask !== null)
+      capture('grammar',grammarStation+'_'+grammarTask);
+  },true);
+})();
