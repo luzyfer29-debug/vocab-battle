@@ -73,6 +73,134 @@ function gapRender(n,checked=false){
 function gapCollect(){if(gapStation===null)return;gapSave(gapStation,Array.from(document.querySelectorAll('[data-gap]'),el=>el.value));}
 function gapCheck(){if(gapStation===null)return;gapCollect();gapRender(gapStation,true);}
 function gapClear(){if(gapStation===null)return;gapSave(gapStation,[]);gapRender(gapStation);}
+
+// Grammar: Original order of normal exercises; no Diff corner.
+// A blank item has prefix/suffix, accepted answers, and optional hint.
+// Open sentences are self-checked against examples, not automatically marked wrong.
+const GRAMMAR=[
+ {title:'Station 1 · Grammar',tasks:[
+  {title:'1 · Put in the right adverbs',items:[
+   ['When Beth tried horse riding, she rode ',' (careful).',['carefully']],
+   ['Katie won the rock climbing competition ',' (easy).',['easily']],
+   ['Jerry is a fantastic rugby player because he can run ',' (fast).',['fast']],
+   ['When the students play rugby, their teacher calls ',' (loud) to them.',['loudly']],
+   ['Tom works ',' (hard) to become a good tennis player.',['hard']],
+   ['Everyone says that Tom plays ',' (brilliant).',['brilliantly']]
+  ],example:'Mark learned the rules quickly (quick).'},
+  {title:'2 · Adjective or adverb? Put in the right form',intro:'Last week Mark’s class went on a school trip. They tried outdoor rock climbing.',items:[
+   ['Everyone was ',' (excited).',['excited']],
+   ['Their instructor told them that climbing is a ',' (dangerous) sport if you aren’t careful.',['dangerous']],
+   ['Their instructor told them that climbing is a dangerous sport if you aren’t ',' (careful).',['careful']],
+   ['So the students borrowed helmets and other equipment to keep them ',' (safe).',['safe']],
+   ['Then they started to climb ',' (slow).',['slowly']],
+   ['After some time they were all ',' (hungry).',['hungry']],
+   ['“Oh, look at the weather,” the instructor said. “It’s going to rain ',' (heavy) soon. Let’s go back!”',['heavily']],
+   ['The students ate their sandwiches ',' (quick) and climbed down again.',['quickly']],
+   ['Everything went ',' (good) and they got back home safely.',['well']],
+   ['Everything went well and they got back home ',' (safe).',['safely']]
+  ]},
+  {title:'3 · Put in the right form',intro:'Wörter: myself · yourself · himself · herself · ourselves · themselves · each other',items:[
+   ['Beth enjoyed ',' at the activity centre.',['herself']],
+   ['Mark hurt ',' when he tried horse riding.',['himself']],
+   ['The rugby players watched ',' in a video of the last rugby game.',['themselves']],
+   ['This morning I made ',' breakfast.',['myself']],
+   ['Teacher: “Did you do your homework ','?”',['yourself']],
+   ['We made ',' pizza for dinner.',['ourselves']],
+   ['Laura and her friend haven’t seen ',' for a long time.',['each other']]
+  ]},
+  {title:'4 · Write four sentences about rugby',intro:'Use adjectives and adverbs. Wörter: popular · fast · quick · slow · easy · safe',open:[
+   'Rugby is a popular sport.', 'It is a fast sport too.',
+   'The players must run quickly.', 'You can learn the rules easily.'
+  ]}
+ ]},
+ {title:'Station 2 · Grammar',tasks:[
+  {title:'1 · Put in the right verb forms',example:'An old man has cut (cut) his finger.',items:[
+   ['A little boy has ',' (burn) his hand.',['burnt','burned']],
+   ['A young girl has ',' (break) her leg.',['broken']],
+   ['Linda has ',' (give) a woman some tablets.',['given']],
+   ['Four people have ',' (have) an accident.',['had']],
+   ['Two women have ',' (sprain) their ankles.',['sprained']],
+   ['Three men have ',' (hurt) their heads.',['hurt']]
+  ]},
+  {title:'2 · Megan works for the emergency services. Make sentences',intro:'Use the present perfect. Vorgaben in Arbeitsblatt-Reihenfolge: work on the computer · open the window · hang up her uniform · drink tea · make a phone call · write a message.',open:[
+   'Megan has already worked on the computer.',
+   'She has already opened the window.',
+   'She has already hung up her uniform.',
+   'She has already drunk tea.',
+   'She has already made a phone call.',
+   'She has already written a message.'
+  ]},
+  {title:'3 · What has happened? Write six sentences in the present perfect',intro:'Use these verbs in order: fall off · hurt · come · arrive · put · take. Example: There has been an accident. Die Bildaufgabe wird hier mit Satzhinweisen geübt.',open:[
+   'A boy has fallen off his bike.',
+   'He has hurt his leg.',
+   'Two police officers have come.',
+   'An ambulance has arrived.',
+   'The doctor has put a bandage on the boy’s leg.',
+   'The dogs have taken the sausages.'
+  ]},
+  {title:'4 · Complete the sentences. Use the present perfect',intro:'Jamie: watch TV ✓, phone his brother ✗. Kim: have football training ✓, do her homework ✗. Max and Lucy: play tennis ✓, be to the hospital ✗. My friend and I: go shopping ✓, buy a present ✗.',example:'Jamie has already watched TV. He hasn’t phoned his brother yet.',items:[
+   ['1. Kim ',' football training.',['has already had']],
+   ['   She ',' her homework yet.',['hasn’t done',"hasn't done"]],
+   ['2. Max and Lucy ',' tennis.',['have already played']],
+   ['   They ',' to the hospital yet.',['haven’t been',"haven't been"]],
+   ['3. My friend and I ',' shopping.',['have already gone']],
+   ['   We ',' a present yet.',['haven’t bought',"haven't bought"]]
+  ]},
+  {title:'5 · What about you? Write two sentences',intro:'What have you already done? What haven’t you done yet? Schreibe zwei eigene Sätze.',open:[
+   'I have already helped my grandparents in the garden.',
+   'I haven’t finished my homework yet.'
+  ]},
+  {title:'6 · Make questions and answer them. Give short answers',intro:'Example: you and your family / ever / be to Wales? → Have you and your family ever been to Wales? → Yes, we have. / No, we haven’t.',open:[
+   'Have you ever won a prize? | Yes, I have. / No, I haven’t.',
+   'Has your best friend ever been in hospital? | Yes, he/she has. / No, he/she hasn’t.',
+   'Has your best friend ever had a cast? | Yes, he/she has. / No, he/she hasn’t.',
+   'Have your friends ever tried rock climbing? | Yes, they have. / No, they haven’t.'
+  ],prompts:[
+   'you / ever / win a prize?',
+   'your best friend / ever / be in hospital?',
+   'your best friend / ever / have a cast?',
+   'your friends / ever / try rock climbing?'
+  ]},
+  {title:'7 · Complete the dialogue. Use the simple past or the present perfect',intro:'Ellie and Brad talk about the activity centre and Brad’s accident.',items:[
+   ['Ellie: Hello Brad. How are you? ',' you already visited (visit) the new activity centre?',['Have']],
+   ['Brad: No, I ',' (not visit) it yet.',['haven’t visited',"haven't visited"]],
+   ['I ',' (have) a little accident last week.',['had']],
+   ['Ellie: Oh, no! What happened? Brad: I ',' (fall) off my skateboard',['fell']],
+   [' and ',' (twist) my knee last Friday.',['twisted']],
+   ['Ellie: ',' you been (be) to the doctor yet?',['Have']],
+   ['Brad: Yes, I ',' already seen (see) a doctor.',['have']],
+   ['I ',' (go) to the hospital yesterday.',['went']],
+   ['They ',' (give) me a bandage and some tablets. It’s not so bad. Don’t worry. Ellie: I hope you get better soon.',['gave']]
+  ]}
+ ]}
+];
+let grammarStation=null,grammarTask=null;
+function grammarKey(st,task){return `vb2grammar_${soloName}_station${st+1}_task${task+1}`;}
+function grammarRead(st,task){try{const v=JSON.parse(localStorage.getItem(grammarKey(st,task))||'[]');return Array.isArray(v)?v:[];}catch{return [];}}
+function grammarWrite(st,task,v){localStorage.setItem(grammarKey(st,task),JSON.stringify(v));}
+function grammarNormalize(v){return String(v||'').trim().toLowerCase().replace(/[’‘]/g,"'").replace(/\s+/g,' ');}
+function grammarMenu(){if(!soloName){soloChooseName();return;}grammarStation=null;grammarTask=null;app.innerHTML=card(`<h2>📘 Grammatik · ${esc(soloName)}</h2><p>Wähle Station 1 oder 2. Die Aufgaben stehen in der Reihenfolge des Arbeitsblatts. Ohne Diff corner.</p><div class="buttons">${btn('Station 1 · Aufgaben 1–4','grammarStation0')}${btn('Station 2 · Aufgaben 1–7','grammarStation1')}</div>`)+card(btn('Zur Battle-Auswahl','soloHome','alt'));}
+function grammarStationMenu(st){grammarStation=st;grammarTask=null;const s=GRAMMAR[st];app.innerHTML=card(`<h2>📘 ${esc(s.title)}</h2><p>Tippe die englischen Antworten selbst ein. Freie Sätze werden anhand von Beispielen selbst kontrolliert.</p>${s.tasks.map((t,i)=>`<div class="player"><strong>${esc(t.title)}</strong><div class="buttons">${btn('Aufgabe öffnen',`grammarTask${i}`)}</div></div>`).join('')}`)+card(btn('Zur Grammatik-Auswahl','grammarMenu','alt'));}
+function grammarCollect(){if(grammarStation===null||grammarTask===null)return;grammarWrite(grammarStation,grammarTask,Array.from(document.querySelectorAll('[data-grammar]'),el=>el.value));}
+function grammarRender(st,task,checked=false){
+ if(!soloName){soloChooseName();return;}grammarStation=st;grammarTask=task;
+ const t=GRAMMAR[st].tasks[task],values=grammarRead(st,task),isOpen=!!t.open;
+ const inputStyle='box-sizing:border-box;display:inline-block;vertical-align:middle;max-width:190px;width:43vw;min-width:100px;min-height:38px;margin:3px 4px;padding:6px 8px;border-radius:8px;background:#fff;color:#17152b;font-size:16px;line-height:1.3';
+ let content='';
+ if(t.items){
+  content=t.items.map(([before,after,answers],i)=>{
+   const val=String(values[i]||''),ok=answers.some(a=>grammarNormalize(a)===grammarNormalize(val));
+   return `<div style="margin:12px 0;line-height:1.85;overflow-wrap:break-word"><strong>${i+1}.</strong> ${esc(before)}<input data-grammar="${i}" aria-label="Aufgabe ${i+1}" autocomplete="off" autocapitalize="none" spellcheck="false" value="${esc(val)}" style="${inputStyle};border:2px solid ${checked?(ok?'#6ee7a8':'#ff8d8d'):'#8c86bd'}">${esc(after)}${checked&&!ok?`<div style="color:#ffb0b0;font-weight:600">Richtig: ${esc(answers.join(' / '))}</div>`:''}</div>`;
+  }).join('');
+ }else{
+  content=t.open.map((example,i)=>`<div style="margin:14px 0"><label style="display:block;margin-bottom:5px"><strong>${i+1}.</strong> ${esc(t.prompts?.[i]||'Schreibe einen vollständigen englischen Satz.')}</label><textarea data-grammar="${i}" rows="2" spellcheck="false" style="box-sizing:border-box;width:100%;max-width:100%;padding:9px;border-radius:8px;font-size:16px;background:white;color:#17152b">${esc(values[i]||'')}</textarea>${checked?`<p class="muted">Musterlösung: <strong>${esc(example)}</strong></p>`:''}</div>`).join('');
+ }
+ const total=t.items?.length||t.open.length,correct=t.items?t.items.filter((x,i)=>x[2].some(a=>grammarNormalize(a)===grammarNormalize(values[i]))).length:0;
+ app.innerHTML=card(`<h2>📘 ${esc(GRAMMAR[st].title)}</h2><h3>${esc(t.title)}</h3>${t.intro?`<p>${esc(t.intro)}</p>`:''}${t.example?`<p class="muted">Example: ${esc(t.example)}</p>`:''}<p class="muted">${isOpen?'Schreibe selbst. Beim Prüfen erscheinen Musterlösungen; andere richtige Sätze sind möglich.':'Trage die richtige englische Form ein.'} Deine Eingaben werden auf diesem Gerät gespeichert.</p>${checked?`<p class="good"><strong>${isOpen?'Vergleiche deine Sätze mit den Musterlösungen.':`${correct} von ${total} richtig.`}</strong></p>`:''}${content}<div class="buttons">${btn(isOpen?'🔎 Musterlösungen zeigen':'✅ Antworten prüfen','grammarCheck')}${btn('🔄 Eingaben leeren','grammarClear','alt')}</div>`)+card(btn('Zur Aufgabenübersicht','grammarBack','alt'));
+}
+function grammarCheck(){if(grammarStation===null||grammarTask===null)return;grammarCollect();grammarRender(grammarStation,grammarTask,true);}
+function grammarClear(){if(grammarStation===null||grammarTask===null)return;grammarWrite(grammarStation,grammarTask,[]);grammarRender(grammarStation,grammarTask);}
+
 const key='vb2solo';
 const SOLO_NAMES=['Luca','Semir','Talea','Nele'];
 let soloName=localStorage.getItem('vb2solo_name')||'';
@@ -132,7 +260,7 @@ function soloSaved(b){try{const s=JSON.parse(localStorage.getItem(soloKey(b))||'
 async function syncSolo(){if(!uid||!db||!solo||!soloName)return;try{await set(ref(db,`soloProgress/${uid}/${soloName}/battle${solo.battle+1}`),{name:soloName,battle:solo.battle+1,done:solo.index,correct:Math.floor(solo.score/10),score:solo.score,finished:!!solo.finished,mistakes:cleanMistakes(solo.mistakes),updatedAt:Date.now()});}catch(e){msg('Online-Speicherung noch nicht möglich: '+e.message,true);}}
 function soloChooseName(){stopSoloHeartbeat();app.innerHTML=card(`<h2>📚 Wer lernt gerade?</h2><p>Wähle deinen Namen, damit der Schiedsrichter deinen Lernfortschritt sehen kann.</p><div class="buttons">${SOLO_NAMES.map((n,i)=>btn(esc(n),`soloName${i}`)).join('')}</div>`)+card(btn('Zurück','home','alt'));}
 function soloSetName(i){soloName=SOLO_NAMES[i];localStorage.setItem('vb2solo_name',soloName);soloHome();}
-function soloHome(){stopSoloHeartbeat();if(!soloName){soloChooseName();return;}solo=null;app.innerHTML=card(`<h2>📚 ${esc(soloName)} · Battle auswählen</h2><p>30 Fragen pro Battle. Falsche Wörter werden danach wiederholt. Der Fortschritt wird auf diesem Handy und zusätzlich online gespeichert.</p>${[0,1,2].map(b=>{const saved=soloSaved(b),done=saved?.index||0;const reviewing=saved&&!saved.finished&&saved.review&&saved.wrong.length;return `<div class="player"><h3>Battle ${b+1}</h3><p>${done} von 30 Fragen erledigt${reviewing?` · 🔁 ${saved.wrong.length} Wörter üben`:''}${saved?.finished?' · abgeschlossen':''}</p><div class="buttons">${btn(saved?'Neu beginnen':'Starten',`soloStart${b}`)}${saved&&!saved.finished?btn('Fortsetzen',`soloResume${b}`,'alt'):''}</div></div>`;}).join('')}${btn('✍️ Lückentext 1 · Station 1','gap0')}${btn('✍️ Lückentext 2 · Station 2','gap1')}${btn('📕 Meine Fehlerliste','soloMistakes','alt')}${btn('Anderen Namen wählen','soloChangeName','alt')}`)+card(btn('Zurück','home','alt'));}
+function soloHome(){stopSoloHeartbeat();if(!soloName){soloChooseName();return;}solo=null;app.innerHTML=card(`<h2>📚 ${esc(soloName)} · Battle auswählen</h2><p>30 Fragen pro Battle. Falsche Wörter werden danach wiederholt. Der Fortschritt wird auf diesem Handy und zusätzlich online gespeichert.</p>${[0,1,2].map(b=>{const saved=soloSaved(b),done=saved?.index||0;const reviewing=saved&&!saved.finished&&saved.review&&saved.wrong.length;return `<div class="player"><h3>Battle ${b+1}</h3><p>${done} von 30 Fragen erledigt${reviewing?` · 🔁 ${saved.wrong.length} Wörter üben`:''}${saved?.finished?' · abgeschlossen':''}</p><div class="buttons">${btn(saved?'Neu beginnen':'Starten',`soloStart${b}`)}${saved&&!saved.finished?btn('Fortsetzen',`soloResume${b}`,'alt'):''}</div></div>`;}).join('')}${btn('📘 Grammatik · Station 1 & 2','grammarMenu')}${btn('✍️ Lückentext 1 · Station 1','gap0')}${btn('✍️ Lückentext 2 · Station 2','gap1')}${btn('📕 Meine Fehlerliste','soloMistakes','alt')}${btn('Anderen Namen wählen','soloChangeName','alt')}`)+card(btn('Zurück','home','alt'));}
 function soloStart(b){const previous=soloSaved(b);solo={battle:b,index:0,score:0,finished:false,wrong:[],review:false,reviewPos:0,mistakes:cleanMistakes(previous?.mistakes)};soloSave();soloQuestion();}
 function soloResume(b){solo=soloSaved(b);if(!solo){soloStart(b);return;}void syncSolo();if(solo.finished)soloFinished();else soloQuestion();}
 function soloQuestion(){if(!solo)return;startSoloHeartbeat();const b=solo.battle;
@@ -189,6 +317,6 @@ function showDashboard(){
  if(!uid){msg('Bitte kurz warten, bis die Anmeldung abgeschlossen ist.',true);return;}
  dashboardUnsubscribe=onValue(ref(db,'soloProgress'),snap=>{renderDashboard(snap.val());},e=>msg('Lernübersicht konnte nicht geladen werden: '+e.message,true));
 }
-document.addEventListener('click',e=>{const a=e.target.closest('[data-action]'),ans=e.target.closest('[data-answer]'),sa=e.target.closest('[data-soloanswer]');if(ans){answer(Number(ans.dataset.answer));return;}if(sa){soloAnswer(Number(sa.dataset.soloanswer));return;}if(!a)return;const v=a.dataset.action;if(v==='home')home();else if(v==='host'||v==='createRoom'||v==='dashboard'||v==='start'||v==='reset')return;else if(v==='join')joinForm();else if(v==='enter')enter();else if(['start','reset'].includes(v))hostAction(v);else if(v==='solo')soloChooseName();else if(v==='dashboard')void showDashboard();else if(v==='soloChangeName')soloChooseName();else if(v==='soloMistakes')showMyMistakes();else if(v==='soloHome')soloHome();else if(v==='gap0')gapRender(0);else if(v==='gap1')gapRender(1);else if(v==='gapCheck')gapCheck();else if(v==='gapClear')gapClear();else if(/^soloName[0-3]$/.test(v))soloSetName(Number(v.slice(-1)));else if(/^soloStart[012]$/.test(v))soloStart(Number(v.slice(-1)));else if(/^soloResume[012]$/.test(v))soloResume(Number(v.slice(-1)));else if(v==='soloNext')soloNext();});
-document.addEventListener('input',e=>{if(e.target.matches('[data-gap]'))gapCollect();});
+document.addEventListener('click',e=>{const a=e.target.closest('[data-action]'),ans=e.target.closest('[data-answer]'),sa=e.target.closest('[data-soloanswer]');if(ans){answer(Number(ans.dataset.answer));return;}if(sa){soloAnswer(Number(sa.dataset.soloanswer));return;}if(!a)return;const v=a.dataset.action;if(v==='home')home();else if(v==='host'||v==='createRoom'||v==='dashboard'||v==='start'||v==='reset')return;else if(v==='join')joinForm();else if(v==='enter')enter();else if(['start','reset'].includes(v))hostAction(v);else if(v==='solo')soloChooseName();else if(v==='dashboard')void showDashboard();else if(v==='soloChangeName')soloChooseName();else if(v==='soloMistakes')showMyMistakes();else if(v==='soloHome')soloHome();else if(v==='grammarMenu')grammarMenu();else if(v==='grammarStation0')grammarStationMenu(0);else if(v==='grammarStation1')grammarStationMenu(1);else if(/^grammarTask\d+$/.test(v)){const n=Number(v.slice(11));if(grammarStation!==null&&n<GRAMMAR[grammarStation].tasks.length)grammarRender(grammarStation,n);}else if(v==='grammarCheck')grammarCheck();else if(v==='grammarClear')grammarClear();else if(v==='grammarBack')grammarStationMenu(grammarStation);else if(v==='gap0')gapRender(0);else if(v==='gap1')gapRender(1);else if(v==='gapCheck')gapCheck();else if(v==='gapClear')gapClear();else if(/^soloName[0-3]$/.test(v))soloSetName(Number(v.slice(-1)));else if(/^soloStart[012]$/.test(v))soloStart(Number(v.slice(-1)));else if(/^soloResume[012]$/.test(v))soloResume(Number(v.slice(-1)));else if(v==='soloNext')soloNext();});
+document.addEventListener('input',e=>{if(e.target.matches('[data-gap]'))gapCollect();if(e.target.matches('[data-grammar]'))grammarCollect();});
 home();try{const fb=initializeApp(firebaseConfig),auth=getAuth(fb);db=getDatabase(fb);onAuthStateChanged(auth,u=>{if(u)uid=u.uid;else signInAnonymously(auth).catch(e=>msg('Anmeldung fehlgeschlagen: '+e.message,true));});}catch(e){msg('Firebase-Konfiguration fehlerhaft: '+e.message,true);}
