@@ -61,11 +61,11 @@ function gapRender(n,checked=false){
   let html='';for(let i=0;i<group.answers.length;i++){
    const idx=pos++,value=String(saved[idx]||''),correct=group.answers[i].some(a=>a.toLocaleLowerCase('en')===value.trim().toLocaleLowerCase('en'));
    html+=esc(group.parts[i]).replace(/\n/g,'<br>');
-   html+=`<input data-gap="${idx}" aria-label="Lücke ${idx+1}" autocomplete="off" autocapitalize="none" spellcheck="false" value="${esc(value)}" style="display:inline-block;vertical-align:middle;max-width:175px;width:42%;min-width:105px;margin:5px 4px;padding:9px;border:2px solid ${checked?(correct?'#6ee7a8':'#ff8d8d'):'#8c86bd'};border-radius:9px;background:#fff;color:#17152b;font-size:16px">`;
+   html+=`<input data-gap="${idx}" aria-label="Lücke ${idx+1}" autocomplete="off" autocapitalize="none" spellcheck="false" value="${esc(value)}" style="display:inline-block;vertical-align:middle;box-sizing:border-box;max-width:130px;width:29vw;min-width:88px;height:38px;margin:2px 3px;padding:5px 7px;border:2px solid ${checked?(correct?'#6ee7a8':'#ff8d8d'):'#8c86bd'};border-radius:7px;background:#fff;color:#17152b;font-size:16px;line-height:1.2">`;
    if(checked&&!correct)html+=`<span style="color:#ffb0b0;font-weight:600"> (${esc(group.answers[i].join(' / '))})</span>`;
   }
   html+=esc(group.parts[group.answers.length]).replace(/\n/g,'<br>');
-  return `<h3>${esc(group.title)}</h3><p style="line-height:2.7;overflow-wrap:anywhere">${html}</p>`;
+  return `<h3>${esc(group.title)}</h3><p style="line-height:1.85;overflow-wrap:break-word">${html}</p>`;
  }).join('');
  const count=answers.filter((a,i)=>a.some(x=>x.toLowerCase()===String(saved[i]||'').trim().toLowerCase())).length;
  app.innerHTML=card(`<h2>✍️ ${esc(data.title)}</h2><p>Schreibe die englischen Wörter in die Lücken. Die Reihenfolge entspricht dem Arbeitsblatt. Deine Eingaben bleiben auf diesem Gerät gespeichert.</p>${checked?`<p class="good"><strong>${count} von ${answers.length} richtig.</strong> Rote Lücken kannst du verbessern und erneut prüfen.</p>`:''}${body}<div class="buttons">${btn('✅ Antworten prüfen','gapCheck')}${btn('🔄 Lücken leeren','gapClear','alt')}</div>`)+card(btn('Zur Battle-Auswahl','soloHome','alt'));
