@@ -115,30 +115,33 @@ function renderDashboard(englishEntries,mathEntries){
   const details=SOLO_NAMES.map(name=>{const records=[1,2,3].map(b=>latest[name+':battle'+b]);const content=records.map((v,b)=>{const summary=`<p><strong>Battle ${b+1}:</strong> ${v?`${Math.min(30,Number(v.done)||0)}/30 · ${Number(v.score)||0} Punkte`:'Noch keine Online-Daten'}</p>`;let mistakes='';if(isMath){mistakes=Object.entries(v?.mistakes||{}).map(([i,count])=>{const q=MATH_BATTLES[b]?.[Number(i)];return q?`<div class="player">${esc(q.q)} → <strong>${esc(q.options[q.correct])}</strong> · ${Number(count)||0}× falsch</div>`:'';}).join('');}else{mistakes=mistakeRows(b,v?.mistakes).map(x=>`<div class="player">${esc(x.word)} – ${esc(x.translation)} · ${x.count}× falsch</div>`).join('');}return summary+(mistakes||'<p class="muted">Keine Fehler online erfasst.</p>');}).join('');return `<details class="player"><summary><strong>${esc(name)}</strong> · Ergebnisse und Fehlerliste</summary>${content}</details>`;}).join('');
   return card(`<h2>${heading}</h2><p class="muted">Erledigte Aufgaben / 30 · Punkte</p>${table}<h3>Fehlerlisten und Einzelheiten</h3>${details}`);
  }).join('');
- app.innerHTML=card('<h2>📊 Live-Lernübersicht</h2><p>Englisch und Mathe getrennt. 🟢 = Aktivität in den letzten 90 Sekunden.</p>')+sections+card('<h2>🗑️ Lernstände zurücksetzen</h2><p>Nur für den Schiedsrichter.</p><label>Auswahl<select id="reset-target"><option value="Luca">Luca</option><option value="Semir">Semir</option><option value="Talea">Talea</option><option value="Nele">Nele</option><option value="all">Alle vier Kinder</option></select></label>'+btn('🗑️ Lernstände zurücksetzen','resetLearning'))+card(btn('Zurück','home','alt'));
+ app.innerHTML=card('<h2>📊 Live-Lernübersicht</h2><p>Englisch und Mathe getrennt. 🟢 = Aktivität in den letzten 90 Sekunden.</p>')+sections+card('<h2>🗑️ Lernstände zurücksetzen</h2><p>Nur für den Schiedsrichter.</p><label>Fach<select id="reset-subject"><option value="english">🇬🇧 Englisch</option><option value="math">🔢 Mathe</option></select></label><label>Kind<select id="reset-target"><option value="Luca">Luca</option><option value="Semir">Semir</option><option value="Talea">Talea</option><option value="Nele">Nele</option><option value="all">Alle vier Kinder</option></select></label>'+btn('🗑️ Lernstände zurücksetzen','resetLearning'))+card(btn('Zurück','home','alt'));
 }
 async function resetLearning(){
  if(resetBusy||!adminLoggedIn||uid!==ADMIN_UID){msg('Nur der Schiedsrichter darf Lernstände löschen.',true);return;}
  const target=document.querySelector('#reset-target')?.value;
+ const subject=document.querySelector('#reset-subject')?.value;
  if(target!=='all'&&!SOLO_NAMES.includes(target)){msg('Bitte ein Kind auswählen.',true);return;}
+ if(!['english','math'].includes(subject)){msg('Bitte ein Fach auswählen.',true);return;}
  const label=target==='all'?'ALLE VIER KINDER':target;
- if(!window.confirm(`ACHTUNG: Online-Lernstände und Fehlerlisten für ${label} löschen? Dies kann nicht rückgängig gemacht werden.`))return;
- if(!window.confirm(`Wirklich endgültig zurücksetzen: ${label}?`))return;
+ const subjectLabel=subject==='math'?'Mathe':'Englisch';
+ if(!window.confirm(`ACHTUNG: Nur ${subjectLabel} für ${label} zurücksetzen? Punkte und Fehlerlisten dieses Fachs werden gelöscht.`))return;
+ if(!window.confirm(`Endgültig ${subjectLabel} für ${label} löschen? Das andere Fach bleibt erhalten.`))return;
  resetBusy=true;
  try{
-  // First broadcast the reset so updated child clients clear local data.
   const targets=target==='all'?SOLO_NAMES:[target];
+  const progressPath=subject==='math'?'mathProgress':'soloProgress';
+  const resetPath=subject==='math'?'learningResetsMath':'learningResetsEnglish';
+  // Fachspezifisches Signal; Kinder-App muss dieses Signal unterstützen.
   const stamp=Date.now();
-  for(const name of targets)await set(ref(db,`learningResets/${name}`),stamp);
-  // Delete the corresponding historical progress across every device UID.
-  const snap=await get(ref(db,'soloProgress'));
-  const entries=snap.val()||{};
+  for(const name of targets)await set(ref(db,`${resetPath}/${name}`),stamp);
+  const snap=await get(ref(db,progressPath));
   const paths={};
-  for(const [device,perDevice] of Object.entries(entries)){
-   for(const name of targets){if(perDevice&&Object.prototype.hasOwnProperty.call(perDevice,name))paths[`${device}/${name}`]=null;}
+  for(const [device,perDevice] of Object.entries(snap.val()||{})){
+   for(const name of targets)if(perDevice&&Object.prototype.hasOwnProperty.call(perDevice,name))paths[`${device}/${name}`]=null;
   }
-  if(Object.keys(paths).length)await update(ref(db,'soloProgress'),paths);
-  try{const ms=await get(ref(db,'mathProgress'));const mp={};for(const [device,perDevice] of Object.entries(ms.val()||{}))for(const name of targets)if(perDevice?.[name])mp[`${device}/${name}`]=null;if(Object.keys(mp).length)await update(ref(db,'mathProgress'),mp);}catch(e){msg('Englisch gelöscht. Mathe-Online-Daten konnten noch nicht gelöscht werden: '+e.message,true);return;}msg(`Online-Lernstände für ${label} gelöscht. Die Kindergeräte müssen die aktuelle App-Version öffnen, damit auch lokale Fehlerlisten gelöscht werden.`);
+  if(Object.keys(paths).length)await update(ref(db,progressPath),paths);
+  msg(`${subjectLabel} für ${label} online zurückgesetzt. Das andere Fach wurde nicht gelöscht. Für das Löschen lokaler Daten auf Kindergeräten ist die aktualisierte Kinder-App erforderlich.`);
  }catch(e){msg('Rücksetzen nicht vollständig abgeschlossen: '+e.message,true);}
  finally{resetBusy=false;}
 }
