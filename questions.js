@@ -1,169 +1,171 @@
+// Unit 2 · Station 1 + Station 2 · blaue Lösungswörter
+// 3 Battles à 30 Fragen. Schwierige Varianten: hard/difficult, tablet/medicine.
 export const BATTLES = [
   [
     {
       "id": 1,
       "q": "Was bedeutet „swimming“ auf Deutsch?",
       "options": [
-        "sicher",
         "Schwimmen",
-        "Unfall",
-        "Gipsverband"
+        "erfolgreich",
+        "geben",
+        "im Freien"
       ],
-      "correct": 1,
+      "correct": 0,
       "word": "swimming"
     },
     {
       "id": 2,
       "q": "Wie heißt „Kanufahren“ auf Englisch?",
       "options": [
-        "burn",
-        "canoeing",
-        "tablet",
-        "stay with"
+        "say",
+        "woods",
+        "stay with",
+        "canoeing"
       ],
-      "correct": 1,
+      "correct": 3,
       "word": "canoeing"
     },
     {
       "id": 3,
       "q": "Was bedeutet „rafting“ auf Deutsch?",
       "options": [
-        "Tablette",
-        "Wald",
-        "Schwimmen",
-        "Rafting"
+        "Rafting",
+        "Rugby",
+        "begabt",
+        "Gipsverband"
       ],
-      "correct": 3,
+      "correct": 0,
       "word": "rafting"
     },
     {
       "id": 4,
-      "q": "Was bedeutet „rugby“ auf Deutsch?",
+      "q": "Wie heißt „Rugby“ auf Englisch?",
       "options": [
-        "erfolgreich",
-        "klettern",
-        "Küstenwache",
-        "Rugby"
+        "boring",
+        "safe",
+        "rugby",
+        "accident"
       ],
-      "correct": 3,
+      "correct": 2,
       "word": "rugby"
     },
     {
       "id": 5,
-      "q": "Wie heißt „Netball“ auf Englisch?",
+      "q": "Was bedeutet „netball“ auf Deutsch?",
       "options": [
-        "plaster",
-        "netball",
-        "burn",
-        "dangerous"
+        "Ausrüstung",
+        "Netball",
+        "Wald",
+        "sagen"
       ],
       "correct": 1,
       "word": "netball"
     },
     {
       "id": 6,
-      "q": "Was bedeutet „basketball“ auf Deutsch?",
+      "q": "Wie heißt „Basketball“ auf Englisch?",
       "options": [
-        "Basketball",
-        "hart",
-        "Zahn",
-        "sagen"
+        "give",
+        "basketball",
+        "burn",
+        "tough"
       ],
-      "correct": 0,
+      "correct": 1,
       "word": "basketball"
     },
     {
       "id": 7,
       "q": "Was bedeutet „skiing“ auf Deutsch?",
       "options": [
-        "sicher",
-        "Skifahren",
-        "Ausflug",
-        "Rafting"
+        "schwierig",
+        "im Freien",
+        "unsportlich",
+        "Skifahren"
       ],
-      "correct": 1,
+      "correct": 3,
       "word": "skiing"
     },
     {
       "id": 8,
       "q": "Wie heißt „klein“ auf Englisch?",
       "options": [
-        "canoeing",
         "small",
-        "successful",
-        "rafting"
+        "fire brigade",
+        "slow",
+        "cast"
       ],
-      "correct": 1,
+      "correct": 0,
       "word": "small"
     },
     {
       "id": 9,
       "q": "Was bedeutet „loud“ auf Deutsch?",
       "options": [
+        "haben",
         "laut",
-        "Pflaster",
-        "klein",
-        "Tablette"
+        "langweilig",
+        "Knie"
       ],
-      "correct": 0,
+      "correct": 1,
       "word": "loud"
     },
     {
       "id": 10,
-      "q": "Was bedeutet „slow“ auf Deutsch?",
+      "q": "Wie heißt „langsam“ auf Englisch?",
       "options": [
-        "Netball",
-        "langsam",
-        "im Freien",
-        "gefährlich"
+        "slow",
+        "police",
+        "climb",
+        "knee"
       ],
-      "correct": 1,
+      "correct": 0,
       "word": "slow"
     },
     {
       "id": 11,
-      "q": "Wie heißt „langweilig“ auf Englisch?",
+      "q": "Was bedeutet „boring“ auf Deutsch?",
       "options": [
-        "burn",
-        "talented",
-        "boring",
-        "rules"
+        "schlecht",
+        "frech",
+        "klettern",
+        "langweilig"
       ],
-      "correct": 2,
+      "correct": 3,
       "word": "boring"
     },
     {
       "id": 12,
-      "q": "Was bedeutet „dangerous“ auf Deutsch?",
+      "q": "Wie heißt „gefährlich“ auf Englisch?",
       "options": [
-        "langsam",
-        "Ausflug",
-        "Knie",
-        "gefährlich"
+        "dangerous",
+        "bandage",
+        "tough",
+        "sprain"
       ],
-      "correct": 3,
+      "correct": 0,
       "word": "dangerous"
     },
     {
       "id": 13,
       "q": "Was bedeutet „hard“ auf Deutsch?",
       "options": [
-        "Rafting",
-        "Zahn",
+        "klein",
         "schwierig",
-        "im Freien"
+        "geduldig",
+        "Netball"
       ],
-      "correct": 2,
+      "correct": 1,
       "word": "hard"
     },
     {
       "id": 14,
       "q": "Wie heißt „schlecht“ auf Englisch?",
       "options": [
-        "skiing",
+        "dangerous",
         "bad",
-        "take",
-        "rugby"
+        "outdoor",
+        "rules"
       ],
       "correct": 1,
       "word": "bad"
@@ -172,190 +174,190 @@ export const BATTLES = [
       "id": 15,
       "q": "Was bedeutet „unfit“ auf Deutsch?",
       "options": [
-        "Knie",
+        "Gipsverband",
         "unsportlich",
-        "schwierig",
-        "Rafting"
+        "Rugby",
+        "Skifahren"
       ],
       "correct": 1,
       "word": "unfit"
     },
     {
       "id": 16,
-      "q": "Was bedeutet „tough“ auf Deutsch?",
+      "q": "Wie heißt „hart / anstrengend“ auf Englisch?",
       "options": [
-        "Pflaster",
-        "bluten",
-        "Basketball",
-        "hart"
+        "tough",
+        "canoeing",
+        "skiing",
+        "call"
       ],
-      "correct": 3,
+      "correct": 0,
       "word": "tough"
     },
     {
       "id": 17,
-      "q": "Wie heißt „Wald“ auf Englisch?",
+      "q": "Was bedeutet „woods“ auf Deutsch?",
       "options": [
-        "competitive",
-        "woods",
-        "loud",
-        "equipment"
+        "Regeln",
+        "Wald",
+        "anrufen",
+        "Schwimmen"
       ],
       "correct": 1,
       "word": "woods"
     },
     {
       "id": 18,
-      "q": "Was bedeutet „trip“ auf Deutsch?",
+      "q": "Wie heißt „Ausflug“ auf Englisch?",
       "options": [
-        "Ausflug",
-        "Notfall",
-        "Rugby",
-        "talentiert"
+        "give",
+        "trip",
+        "skiing",
+        "say"
       ],
-      "correct": 0,
+      "correct": 1,
       "word": "trip"
     },
     {
       "id": 19,
       "q": "Was bedeutet „climb“ auf Deutsch?",
       "options": [
-        "Krankenwagen",
+        "Kanufahren",
+        "hart / anstrengend",
         "klettern",
-        "anrufen",
-        "unsportlich"
+        "klein"
       ],
-      "correct": 1,
+      "correct": 2,
       "word": "climb"
     },
     {
       "id": 20,
       "q": "Wie heißt „Regeln“ auf Englisch?",
       "options": [
-        "rugby",
         "rules",
-        "knee",
-        "stay with"
+        "tablet",
+        "plaster",
+        "netball"
       ],
-      "correct": 1,
+      "correct": 0,
       "word": "rules"
     },
     {
       "id": 21,
       "q": "Was bedeutet „outdoor“ auf Deutsch?",
       "options": [
-        "unsportlich",
-        "langsam",
-        "Notfall",
-        "im Freien"
+        "Tablette",
+        "Unfall",
+        "im Freien",
+        "Pflaster"
       ],
-      "correct": 3,
+      "correct": 2,
       "word": "outdoor"
     },
     {
       "id": 22,
-      "q": "Was bedeutet „equipment“ auf Deutsch?",
+      "q": "Wie heißt „Ausrüstung“ auf Englisch?",
       "options": [
-        "Ausrüstung",
-        "Knie",
-        "verbrennen",
-        "klein"
+        "talented",
+        "canoeing",
+        "equipment",
+        "police"
       ],
-      "correct": 0,
+      "correct": 2,
       "word": "equipment"
     },
     {
       "id": 23,
-      "q": "Wie heißt „sicher“ auf Englisch?",
+      "q": "Was bedeutet „safe“ auf Deutsch?",
       "options": [
-        "safe",
-        "coastguard",
-        "basketball",
-        "woods"
+        "Rafting",
+        "nehmen",
+        "Wald",
+        "sicher"
       ],
-      "correct": 0,
+      "correct": 3,
       "word": "safe"
     },
     {
       "id": 24,
-      "q": "Was bedeutet „patient“ auf Deutsch?",
+      "q": "Wie heißt „geduldig“ auf Englisch?",
       "options": [
-        "geduldig",
-        "geben",
-        "bluten",
-        "verbrennen"
+        "have",
+        "patient",
+        "rafting",
+        "skiing"
       ],
-      "correct": 0,
+      "correct": 1,
       "word": "patient"
     },
     {
       "id": 25,
       "q": "Was bedeutet „talented“ auf Deutsch?",
       "options": [
-        "ehrgeizig",
-        "Skifahren",
-        "bluten",
-        "talentiert"
+        "Ausflug",
+        "Wald",
+        "Regeln",
+        "begabt"
       ],
       "correct": 3,
       "word": "talented"
     },
     {
       "id": 26,
-      "q": "Wie heißt „ehrgeizig“ auf Englisch?",
+      "q": "Wie heißt „leistungsorientiert“ auf Englisch?",
       "options": [
-        "slow",
-        "coastguard",
         "competitive",
-        "swimming"
+        "accident",
+        "emergency",
+        "outdoor"
       ],
-      "correct": 2,
+      "correct": 0,
       "word": "competitive"
     },
     {
       "id": 27,
       "q": "Was bedeutet „successful“ auf Deutsch?",
       "options": [
-        "laut",
+        "verstauchen",
         "erfolgreich",
-        "schwierig",
-        "Feuerwehr"
+        "gefährlich",
+        "sagen"
       ],
       "correct": 1,
       "word": "successful"
     },
     {
       "id": 28,
-      "q": "Was bedeutet „cheeky“ auf Deutsch?",
+      "q": "Wie heißt „frech“ auf Englisch?",
       "options": [
-        "frech",
-        "nehmen",
-        "Kanufahren",
-        "Ausrüstung"
+        "slow",
+        "loud",
+        "cheeky",
+        "fire brigade"
       ],
-      "correct": 0,
+      "correct": 2,
       "word": "cheeky"
     },
     {
       "id": 29,
-      "q": "Wie heißt „erschöpft“ auf Englisch?",
+      "q": "Was bedeutet „exhausted“ auf Deutsch?",
       "options": [
-        "climb",
-        "competitive",
-        "exhausted",
-        "talented"
+        "haben",
+        "erschöpft",
+        "begabt",
+        "Pflaster"
       ],
-      "correct": 2,
+      "correct": 1,
       "word": "exhausted"
     },
     {
       "id": 30,
-      "q": "Was bedeutet „plaster“ auf Deutsch?",
+      "q": "Wie heißt „Pflaster“ auf Englisch?",
       "options": [
-        "Pflaster",
-        "schwierig",
-        "Basketball",
-        "bei jemandem bleiben"
+        "plaster",
+        "trip",
+        "bad",
+        "tough"
       ],
       "correct": 0,
       "word": "plaster"
@@ -364,36 +366,36 @@ export const BATTLES = [
   [
     {
       "id": 31,
-      "q": "Was bedeutet „bandage“ auf Deutsch?",
+      "q": "Wie heißt „Verband“ auf Englisch?",
       "options": [
-        "Wald",
-        "Verband",
-        "anrufen",
-        "nehmen"
+        "burn",
+        "tough",
+        "take",
+        "bandage"
       ],
-      "correct": 1,
+      "correct": 3,
       "word": "bandage"
     },
     {
       "id": 32,
-      "q": "Wie heißt „Krankenwagen“ auf Englisch?",
+      "q": "Was bedeutet „ambulance“ auf Deutsch?",
       "options": [
-        "bleed",
-        "take",
-        "plaster",
-        "ambulance"
+        "anrufen",
+        "Ausflug",
+        "erfolgreich",
+        "Krankenwagen"
       ],
       "correct": 3,
       "word": "ambulance"
     },
     {
       "id": 33,
-      "q": "Was bedeutet „tooth“ auf Deutsch?",
+      "q": "Wie heißt „Zahn“ auf Englisch?",
       "options": [
-        "Zahn",
-        "Gipsverband",
-        "sicher",
-        "Regeln"
+        "tooth",
+        "boring",
+        "swimming",
+        "dangerous"
       ],
       "correct": 0,
       "word": "tooth"
@@ -402,10 +404,10 @@ export const BATTLES = [
       "id": 34,
       "q": "Was bedeutet „tablet“ auf Deutsch?",
       "options": [
-        "Wald",
+        "Notfall",
         "Tablette",
-        "sicher",
-        "Zahn"
+        "verstauchen",
+        "Schwimmen"
       ],
       "correct": 1,
       "word": "tablet"
@@ -414,130 +416,130 @@ export const BATTLES = [
       "id": 35,
       "q": "Wie heißt „Gipsverband“ auf Englisch?",
       "options": [
+        "slow",
+        "boring",
         "cast",
-        "burn",
-        "knee",
-        "have"
+        "basketball"
       ],
-      "correct": 0,
+      "correct": 2,
       "word": "cast"
     },
     {
       "id": 36,
       "q": "Was bedeutet „accident“ auf Deutsch?",
       "options": [
-        "Unfall",
-        "anrufen",
-        "Netball",
-        "Tablette"
+        "geduldig",
+        "Verband",
+        "laut",
+        "Unfall"
       ],
-      "correct": 0,
+      "correct": 3,
       "word": "accident"
     },
     {
       "id": 37,
-      "q": "Was bedeutet „bleed“ auf Deutsch?",
+      "q": "Wie heißt „bluten“ auf Englisch?",
       "options": [
-        "ehrgeizig",
-        "Schwimmen",
-        "bluten",
-        "Polizei"
+        "loud",
+        "have",
+        "bleed",
+        "skiing"
       ],
       "correct": 2,
       "word": "bleed"
     },
     {
       "id": 38,
-      "q": "Wie heißt „Knie“ auf Englisch?",
+      "q": "Was bedeutet „knee“ auf Deutsch?",
       "options": [
-        "sprain",
-        "basketball",
-        "knee",
-        "burn"
+        "bei jemandem bleiben",
+        "Ausflug",
+        "Knie",
+        "Polizei"
       ],
       "correct": 2,
       "word": "knee"
     },
     {
       "id": 39,
-      "q": "Was bedeutet „sprain“ auf Deutsch?",
+      "q": "Wie heißt „verstauchen“ auf Englisch?",
       "options": [
-        "verstauchen",
-        "frech",
-        "nehmen",
-        "Verband"
+        "police",
+        "sprain",
+        "swimming",
+        "woods"
       ],
-      "correct": 0,
+      "correct": 1,
       "word": "sprain"
     },
     {
       "id": 40,
       "q": "Was bedeutet „burn“ auf Deutsch?",
       "options": [
-        "Feuerwehr",
-        "gefährlich",
-        "Skifahren",
-        "verbrennen"
+        "verbrennen",
+        "klettern",
+        "sicher",
+        "im Freien"
       ],
-      "correct": 3,
+      "correct": 0,
       "word": "burn"
     },
     {
       "id": 41,
       "q": "Wie heißt „Notfall“ auf Englisch?",
       "options": [
+        "rules",
         "emergency",
-        "hard",
-        "talented",
-        "basketball"
+        "knee",
+        "call"
       ],
-      "correct": 0,
+      "correct": 1,
       "word": "emergency"
     },
     {
       "id": 42,
       "q": "Was bedeutet „have“ auf Deutsch?",
       "options": [
-        "Gipsverband",
+        "Skifahren",
         "haben",
-        "Ausflug",
-        "sagen"
+        "sicher",
+        "frech"
       ],
       "correct": 1,
       "word": "have"
     },
     {
       "id": 43,
-      "q": "Was bedeutet „call“ auf Deutsch?",
+      "q": "Wie heißt „anrufen“ auf Englisch?",
       "options": [
-        "anrufen",
-        "haben",
-        "Gipsverband",
-        "hart"
+        "say",
+        "have",
+        "climb",
+        "call"
       ],
-      "correct": 0,
+      "correct": 3,
       "word": "call"
     },
     {
       "id": 44,
-      "q": "Wie heißt „geben“ auf Englisch?",
+      "q": "Was bedeutet „give“ auf Deutsch?",
       "options": [
-        "tooth",
-        "give",
-        "say",
-        "rugby"
+        "Zahn",
+        "Notfall",
+        "geben",
+        "Schwimmen"
       ],
-      "correct": 1,
+      "correct": 2,
       "word": "give"
     },
     {
       "id": 45,
-      "q": "Was bedeutet „say“ auf Deutsch?",
+      "q": "Wie heißt „sagen“ auf Englisch?",
       "options": [
-        "im Freien",
-        "Polizei",
-        "Kanufahren",
-        "sagen"
+        "accident",
+        "exhausted",
+        "patient",
+        "say"
       ],
       "correct": 3,
       "word": "say"
@@ -546,543 +548,543 @@ export const BATTLES = [
       "id": 46,
       "q": "Was bedeutet „stay with“ auf Deutsch?",
       "options": [
-        "bei jemandem bleiben",
         "Polizei",
-        "Zahn",
-        "Unfall"
+        "bei jemandem bleiben",
+        "hart / anstrengend",
+        "Feuerwehr"
       ],
-      "correct": 0,
+      "correct": 1,
       "word": "stay with"
     },
     {
       "id": 47,
       "q": "Wie heißt „nehmen“ auf Englisch?",
       "options": [
-        "burn",
+        "talented",
+        "tough",
         "take",
-        "fire brigade",
-        "hard"
+        "netball"
       ],
-      "correct": 1,
+      "correct": 2,
       "word": "take"
     },
     {
       "id": 48,
       "q": "Was bedeutet „police“ auf Deutsch?",
       "options": [
-        "Notfall",
+        "Küstenwache",
         "Polizei",
-        "frech",
-        "haben"
+        "schlecht",
+        "erschöpft"
       ],
       "correct": 1,
       "word": "police"
     },
     {
       "id": 49,
-      "q": "Was bedeutet „fire brigade“ auf Deutsch?",
+      "q": "Wie heißt „Feuerwehr“ auf Englisch?",
       "options": [
-        "geben",
-        "Unfall",
-        "Feuerwehr",
-        "Zahn"
+        "rules",
+        "patient",
+        "fire brigade",
+        "bleed"
       ],
       "correct": 2,
       "word": "fire brigade"
     },
     {
       "id": 50,
-      "q": "Wie heißt „Küstenwache“ auf Englisch?",
+      "q": "Was bedeutet „coastguard“ auf Deutsch?",
       "options": [
-        "coastguard",
-        "netball",
-        "plaster",
-        "rafting"
+        "Küstenwache",
+        "klein",
+        "sicher",
+        "im Freien"
       ],
       "correct": 0,
       "word": "coastguard"
     },
     {
       "id": 51,
-      "q": "Runde 2: Was bedeutet „swimming“ auf Deutsch?",
+      "q": "Wie heißt „Schwimmen“ auf Englisch?",
       "options": [
-        "Pflaster",
-        "Schwimmen",
-        "klettern",
-        "Krankenwagen"
+        "cheeky",
+        "swimming",
+        "dangerous",
+        "small"
       ],
       "correct": 1,
       "word": "swimming"
     },
     {
       "id": 52,
-      "q": "Runde 2: Was bedeutet „trip“ auf Deutsch?",
-      "options": [
-        "sagen",
-        "anrufen",
-        "Ausflug",
-        "Polizei"
-      ],
-      "correct": 2,
-      "word": "trip"
-    },
-    {
-      "id": 53,
-      "q": "Runde 2: Wie heißt „Gipsverband“ auf Englisch?",
-      "options": [
-        "safe",
-        "basketball",
-        "plaster",
-        "cast"
-      ],
-      "correct": 3,
-      "word": "cast"
-    },
-    {
-      "id": 54,
       "q": "Was bedeutet „canoeing“ auf Deutsch?",
       "options": [
-        "Notfall",
+        "Netball",
         "Kanufahren",
-        "ehrgeizig",
-        "Ausrüstung"
+        "laut",
+        "Krankenwagen"
       ],
       "correct": 1,
       "word": "canoeing"
     },
     {
-      "id": 55,
-      "q": "Runde 2: Was bedeutet „climb“ auf Deutsch?",
+      "id": 53,
+      "q": "Wie heißt „Rafting“ auf Englisch?",
       "options": [
-        "Pflaster",
-        "Rugby",
-        "sagen",
-        "klettern"
-      ],
-      "correct": 3,
-      "word": "climb"
-    },
-    {
-      "id": 56,
-      "q": "Wie heißt „Unfall“ auf Englisch?",
-      "options": [
-        "accident",
-        "competitive",
-        "coastguard",
-        "exhausted"
-      ],
-      "correct": 0,
-      "word": "accident"
-    },
-    {
-      "id": 57,
-      "q": "Runde 2: Was bedeutet „rafting“ auf Deutsch?",
-      "options": [
-        "bluten",
-        "erschöpft",
-        "Rafting",
-        "Wald"
+        "trip",
+        "bandage",
+        "rafting",
+        "knee"
       ],
       "correct": 2,
       "word": "rafting"
     },
     {
-      "id": 58,
-      "q": "Was bedeutet „rules“ auf Deutsch?",
+      "id": 54,
+      "q": "Was bedeutet „rugby“ auf Deutsch?",
       "options": [
+        "sicher",
+        "hart / anstrengend",
         "Rugby",
-        "Regeln",
-        "verstauchen",
-        "laut"
-      ],
-      "correct": 1,
-      "word": "rules"
-    },
-    {
-      "id": 59,
-      "q": "Wie heißt „bluten“ auf Englisch?",
-      "options": [
-        "call",
-        "loud",
-        "bleed",
-        "talented"
+        "verstauchen"
       ],
       "correct": 2,
-      "word": "bleed"
-    },
-    {
-      "id": 60,
-      "q": "Runde 2: Was bedeutet „rugby“ auf Deutsch?",
-      "options": [
-        "Rugby",
-        "sicher",
-        "Ausrüstung",
-        "frech"
-      ],
-      "correct": 0,
       "word": "rugby"
-    }
-  ],
-  [
-    {
-      "id": 61,
-      "q": "Runde 3: Was bedeutet „outdoor“ auf Deutsch?",
-      "options": [
-        "geben",
-        "frech",
-        "sicher",
-        "im Freien"
-      ],
-      "correct": 3,
-      "word": "outdoor"
     },
     {
-      "id": 62,
-      "q": "Runde 3: Wie heißt „Knie“ auf Englisch?",
+      "id": 55,
+      "q": "Wie heißt „Netball“ auf Englisch?",
       "options": [
-        "small",
-        "woods",
-        "boring",
-        "knee"
-      ],
-      "correct": 3,
-      "word": "knee"
-    },
-    {
-      "id": 63,
-      "q": "Was bedeutet „netball“ auf Deutsch?",
-      "options": [
-        "klettern",
-        "geben",
-        "Netball",
-        "Pflaster"
+        "skiing",
+        "rugby",
+        "netball",
+        "loud"
       ],
       "correct": 2,
       "word": "netball"
     },
     {
-      "id": 64,
-      "q": "Runde 3: Was bedeutet „equipment“ auf Deutsch?",
+      "id": 56,
+      "q": "Was bedeutet „basketball“ auf Deutsch?",
       "options": [
-        "Ausrüstung",
-        "Skifahren",
-        "Tablette",
-        "sicher"
+        "Basketball",
+        "gefährlich",
+        "bei jemandem bleiben",
+        "Notfall"
       ],
       "correct": 0,
-      "word": "equipment"
-    },
-    {
-      "id": 65,
-      "q": "Wie heißt „verstauchen“ auf Englisch?",
-      "options": [
-        "slow",
-        "stay with",
-        "sprain",
-        "cheeky"
-      ],
-      "correct": 2,
-      "word": "sprain"
-    },
-    {
-      "id": 66,
-      "q": "Runde 3: Was bedeutet „basketball“ auf Deutsch?",
-      "options": [
-        "Ausrüstung",
-        "Basketball",
-        "Ausflug",
-        "verbrennen"
-      ],
-      "correct": 1,
       "word": "basketball"
     },
     {
-      "id": 67,
-      "q": "Was bedeutet „safe“ auf Deutsch?",
+      "id": 57,
+      "q": "Wie heißt „Skifahren“ auf Englisch?",
       "options": [
-        "bei jemandem bleiben",
-        "sicher",
-        "klein",
-        "im Freien"
-      ],
-      "correct": 1,
-      "word": "safe"
-    },
-    {
-      "id": 68,
-      "q": "Wie heißt „verbrennen“ auf Englisch?",
-      "options": [
-        "burn",
-        "cast",
-        "woods",
-        "loud"
+        "skiing",
+        "bleed",
+        "cheeky",
+        "plaster"
       ],
       "correct": 0,
-      "word": "burn"
-    },
-    {
-      "id": 69,
-      "q": "Runde 3: Was bedeutet „skiing“ auf Deutsch?",
-      "options": [
-        "Unfall",
-        "Skifahren",
-        "verbrennen",
-        "Ausrüstung"
-      ],
-      "correct": 1,
       "word": "skiing"
     },
     {
-      "id": 70,
-      "q": "Runde 3: Was bedeutet „patient“ auf Deutsch?",
-      "options": [
-        "langweilig",
-        "geduldig",
-        "Notfall",
-        "anrufen"
-      ],
-      "correct": 1,
-      "word": "patient"
-    },
-    {
-      "id": 71,
-      "q": "Runde 3: Wie heißt „Notfall“ auf Englisch?",
-      "options": [
-        "emergency",
-        "cast",
-        "police",
-        "bandage"
-      ],
-      "correct": 0,
-      "word": "emergency"
-    },
-    {
-      "id": 72,
+      "id": 58,
       "q": "Was bedeutet „small“ auf Deutsch?",
       "options": [
+        "laut",
         "klein",
-        "Tablette",
-        "Verband",
-        "schwierig"
+        "sicher",
+        "haben"
       ],
-      "correct": 0,
+      "correct": 1,
       "word": "small"
     },
     {
-      "id": 73,
-      "q": "Runde 3: Was bedeutet „talented“ auf Deutsch?",
+      "id": 59,
+      "q": "Wie heißt „laut“ auf Englisch?",
       "options": [
-        "Zahn",
-        "talentiert",
-        "ehrgeizig",
-        "schwierig"
+        "successful",
+        "tablet",
+        "loud",
+        "woods"
       ],
-      "correct": 1,
-      "word": "talented"
-    },
-    {
-      "id": 74,
-      "q": "Wie heißt „haben“ auf Englisch?",
-      "options": [
-        "give",
-        "have",
-        "patient",
-        "ambulance"
-      ],
-      "correct": 1,
-      "word": "have"
-    },
-    {
-      "id": 75,
-      "q": "Runde 3: Was bedeutet „loud“ auf Deutsch?",
-      "options": [
-        "gefährlich",
-        "laut",
-        "im Freien",
-        "Krankenwagen"
-      ],
-      "correct": 1,
+      "correct": 2,
       "word": "loud"
     },
     {
-      "id": 76,
-      "q": "Was bedeutet „competitive“ auf Deutsch?",
+      "id": 60,
+      "q": "Was bedeutet „slow“ auf Deutsch?",
       "options": [
-        "Verband",
-        "ehrgeizig",
-        "Feuerwehr",
-        "verstauchen"
+        "Schwimmen",
+        "langsam",
+        "Zahn",
+        "Regeln"
+      ],
+      "correct": 1,
+      "word": "slow"
+    }
+  ],
+  [
+    {
+      "id": 61,
+      "q": "Was bedeutet „boring“ auf Deutsch?",
+      "options": [
+        "Netball",
+        "langweilig",
+        "bluten",
+        "bei jemandem bleiben"
+      ],
+      "correct": 1,
+      "word": "boring"
+    },
+    {
+      "id": 62,
+      "q": "Wie heißt „gefährlich“ auf Englisch?",
+      "options": [
+        "call",
+        "dangerous",
+        "coastguard",
+        "knee"
+      ],
+      "correct": 1,
+      "word": "dangerous"
+    },
+    {
+      "id": 63,
+      "q": "Was bedeutet „hard“ auf Deutsch?",
+      "options": [
+        "haben",
+        "hart / anstrengend",
+        "Skifahren",
+        "schwierig"
+      ],
+      "correct": 3,
+      "word": "hard"
+    },
+    {
+      "id": 64,
+      "q": "Wie heißt „schlecht“ auf Englisch?",
+      "options": [
+        "woods",
+        "tough",
+        "coastguard",
+        "bad"
+      ],
+      "correct": 3,
+      "word": "bad"
+    },
+    {
+      "id": 65,
+      "q": "Was bedeutet „unfit“ auf Deutsch?",
+      "options": [
+        "bei jemandem bleiben",
+        "unsportlich",
+        "Notfall",
+        "geduldig"
+      ],
+      "correct": 1,
+      "word": "unfit"
+    },
+    {
+      "id": 66,
+      "q": "Wie heißt „hart / anstrengend“ auf Englisch?",
+      "options": [
+        "coastguard",
+        "cheeky",
+        "outdoor",
+        "tough"
+      ],
+      "correct": 3,
+      "word": "tough"
+    },
+    {
+      "id": 67,
+      "q": "Was bedeutet „woods“ auf Deutsch?",
+      "options": [
+        "gefährlich",
+        "klettern",
+        "Wald",
+        "schwierig"
+      ],
+      "correct": 2,
+      "word": "woods"
+    },
+    {
+      "id": 68,
+      "q": "Wie heißt „Ausflug“ auf Englisch?",
+      "options": [
+        "woods",
+        "trip",
+        "safe",
+        "netball"
+      ],
+      "correct": 1,
+      "word": "trip"
+    },
+    {
+      "id": 69,
+      "q": "Was bedeutet „climb“ auf Deutsch?",
+      "options": [
+        "Skifahren",
+        "verstauchen",
+        "klettern",
+        "anrufen"
+      ],
+      "correct": 2,
+      "word": "climb"
+    },
+    {
+      "id": 70,
+      "q": "Wie heißt „Regeln“ auf Englisch?",
+      "options": [
+        "rules",
+        "give",
+        "loud",
+        "ambulance"
+      ],
+      "correct": 0,
+      "word": "rules"
+    },
+    {
+      "id": 71,
+      "q": "Was bedeutet „outdoor“ auf Deutsch?",
+      "options": [
+        "im Freien",
+        "leistungsorientiert",
+        "geduldig",
+        "Knie"
+      ],
+      "correct": 0,
+      "word": "outdoor"
+    },
+    {
+      "id": 72,
+      "q": "Wie heißt „Ausrüstung“ auf Englisch?",
+      "options": [
+        "call",
+        "coastguard",
+        "equipment",
+        "ambulance"
+      ],
+      "correct": 2,
+      "word": "equipment"
+    },
+    {
+      "id": 73,
+      "q": "Was bedeutet „safe“ auf Deutsch?",
+      "options": [
+        "geben",
+        "Zahn",
+        "erschöpft",
+        "sicher"
+      ],
+      "correct": 3,
+      "word": "safe"
+    },
+    {
+      "id": 74,
+      "q": "Wie heißt „geduldig“ auf Englisch?",
+      "options": [
+        "patient",
+        "stay with",
+        "boring",
+        "ambulance"
+      ],
+      "correct": 0,
+      "word": "patient"
+    },
+    {
+      "id": 75,
+      "q": "Was bedeutet „talented“ auf Deutsch?",
+      "options": [
+        "geduldig",
+        "Pflaster",
+        "begabt",
+        "haben"
+      ],
+      "correct": 2,
+      "word": "talented"
+    },
+    {
+      "id": 76,
+      "q": "Wie heißt „leistungsorientiert“ auf Englisch?",
+      "options": [
+        "plaster",
+        "competitive",
+        "have",
+        "safe"
       ],
       "correct": 1,
       "word": "competitive"
     },
     {
       "id": 77,
-      "q": "Wie heißt „anrufen“ auf Englisch?",
+      "q": "Was bedeutet „successful“ auf Deutsch?",
       "options": [
-        "netball",
-        "emergency",
-        "call",
-        "coastguard"
+        "Wald",
+        "bei jemandem bleiben",
+        "Verband",
+        "erfolgreich"
       ],
-      "correct": 2,
-      "word": "call"
-    },
-    {
-      "id": 78,
-      "q": "Runde 3: Was bedeutet „slow“ auf Deutsch?",
-      "options": [
-        "Skifahren",
-        "langsam",
-        "Rugby",
-        "Kanufahren"
-      ],
-      "correct": 1,
-      "word": "slow"
-    },
-    {
-      "id": 79,
-      "q": "Runde 3: Was bedeutet „successful“ auf Deutsch?",
-      "options": [
-        "erfolgreich",
-        "Netball",
-        "hart",
-        "geduldig"
-      ],
-      "correct": 0,
+      "correct": 3,
       "word": "successful"
     },
     {
-      "id": 80,
-      "q": "Runde 3: Wie heißt „geben“ auf Englisch?",
+      "id": 78,
+      "q": "Wie heißt „frech“ auf Englisch?",
       "options": [
-        "tablet",
-        "rugby",
-        "give",
-        "rules"
+        "sprain",
+        "canoeing",
+        "cheeky",
+        "cast"
       ],
       "correct": 2,
-      "word": "give"
-    },
-    {
-      "id": 81,
-      "q": "Was bedeutet „boring“ auf Deutsch?",
-      "options": [
-        "Skifahren",
-        "gefährlich",
-        "langweilig",
-        "erfolgreich"
-      ],
-      "correct": 2,
-      "word": "boring"
-    },
-    {
-      "id": 82,
-      "q": "Runde 3: Was bedeutet „cheeky“ auf Deutsch?",
-      "options": [
-        "frech",
-        "Netball",
-        "Unfall",
-        "sicher"
-      ],
-      "correct": 0,
       "word": "cheeky"
     },
     {
-      "id": 83,
-      "q": "Wie heißt „sagen“ auf Englisch?",
-      "options": [
-        "take",
-        "skiing",
-        "say",
-        "police"
-      ],
-      "correct": 2,
-      "word": "say"
-    },
-    {
-      "id": 84,
-      "q": "Runde 3: Was bedeutet „dangerous“ auf Deutsch?",
-      "options": [
-        "Krankenwagen",
-        "gefährlich",
-        "verbrennen",
-        "geduldig"
-      ],
-      "correct": 1,
-      "word": "dangerous"
-    },
-    {
-      "id": 85,
+      "id": 79,
       "q": "Was bedeutet „exhausted“ auf Deutsch?",
       "options": [
-        "Schwimmen",
-        "nehmen",
+        "Unfall",
         "erschöpft",
-        "Wald"
+        "nehmen",
+        "im Freien"
       ],
-      "correct": 2,
+      "correct": 1,
       "word": "exhausted"
     },
     {
-      "id": 86,
-      "q": "Wie heißt „bei jemandem bleiben“ auf Englisch?",
+      "id": 80,
+      "q": "Wie heißt „Pflaster“ auf Englisch?",
       "options": [
-        "police",
-        "say",
-        "slow",
-        "stay with"
-      ],
-      "correct": 3,
-      "word": "stay with"
-    },
-    {
-      "id": 87,
-      "q": "Runde 3: Was bedeutet „hard“ auf Deutsch?",
-      "options": [
-        "hart",
-        "Zahn",
-        "schwierig",
-        "geduldig"
-      ],
-      "correct": 2,
-      "word": "hard"
-    },
-    {
-      "id": 88,
-      "q": "Runde 3: Was bedeutet „plaster“ auf Deutsch?",
-      "options": [
-        "Pflaster",
-        "bei jemandem bleiben",
-        "geduldig",
-        "Verband"
+        "plaster",
+        "tablet",
+        "hard",
+        "burn"
       ],
       "correct": 0,
       "word": "plaster"
     },
     {
-      "id": 89,
-      "q": "Runde 3: Wie heißt „nehmen“ auf Englisch?",
+      "id": 81,
+      "q": "Was bedeutet „bandage“ auf Deutsch?",
       "options": [
-        "take",
-        "call",
-        "plaster",
-        "trip"
+        "geben",
+        "klettern",
+        "Verband",
+        "Ausflug"
+      ],
+      "correct": 2,
+      "word": "bandage"
+    },
+    {
+      "id": 82,
+      "q": "Wie heißt „Krankenwagen“ auf Englisch?",
+      "options": [
+        "dangerous",
+        "ambulance",
+        "rugby",
+        "climb"
+      ],
+      "correct": 1,
+      "word": "ambulance"
+    },
+    {
+      "id": 83,
+      "q": "Was bedeutet „tooth“ auf Deutsch?",
+      "options": [
+        "Skifahren",
+        "Netball",
+        "Zahn",
+        "Verband"
+      ],
+      "correct": 2,
+      "word": "tooth"
+    },
+    {
+      "id": 84,
+      "q": "Wie heißt „Tablette“ auf Englisch?",
+      "options": [
+        "tablet",
+        "climb",
+        "bad",
+        "ambulance"
       ],
       "correct": 0,
-      "word": "take"
+      "word": "tablet"
+    },
+    {
+      "id": 85,
+      "q": "Was bedeutet „cast“ auf Deutsch?",
+      "options": [
+        "Polizei",
+        "Basketball",
+        "leistungsorientiert",
+        "Gipsverband"
+      ],
+      "correct": 3,
+      "word": "cast"
+    },
+    {
+      "id": 86,
+      "q": "Wie heißt „Unfall“ auf Englisch?",
+      "options": [
+        "exhausted",
+        "loud",
+        "police",
+        "accident"
+      ],
+      "correct": 3,
+      "word": "accident"
+    },
+    {
+      "id": 87,
+      "q": "Was bedeutet „bleed“ auf Deutsch?",
+      "options": [
+        "sagen",
+        "Pflaster",
+        "Ausrüstung",
+        "bluten"
+      ],
+      "correct": 3,
+      "word": "bleed"
+    },
+    {
+      "id": 88,
+      "q": "Wie heißt „Knie“ auf Englisch?",
+      "options": [
+        "canoeing",
+        "bleed",
+        "knee",
+        "trip"
+      ],
+      "correct": 2,
+      "word": "knee"
+    },
+    {
+      "id": 89,
+      "q": "Was bedeutet „sprain“ auf Deutsch?",
+      "options": [
+        "Zahn",
+        "Schwimmen",
+        "verstauchen",
+        "frech"
+      ],
+      "correct": 2,
+      "word": "sprain"
     },
     {
       "id": 90,
-      "q": "Was bedeutet „bad“ auf Deutsch?",
+      "q": "Wie heißt „verbrennen“ auf Englisch?",
       "options": [
-        "erschöpft",
-        "schwierig",
-        "frech",
-        "schlecht"
+        "cheeky",
+        "burn",
+        "accident",
+        "outdoor"
       ],
-      "correct": 3,
-      "word": "bad"
+      "correct": 1,
+      "word": "burn"
     }
   ]
 ];
