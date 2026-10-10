@@ -4,11 +4,13 @@ import {getDatabase,ref,onValue,get,set,update,runTransaction,remove} from 'http
 import {firebaseConfig} from './firebase-config.js';
 import {BATTLES} from './questions.js';
 import {MATH_BATTLES} from './math-questions.js';
+import {GRAMMAR} from './grammar-data.js';
 const app=document.querySelector('#app'),status=document.querySelector('#status');
 const names=['Luca','Semir','Talea','Nele'];
 const QUESTION_MS=15000,REVEAL_MS=3000;
 const ADMIN_UID='M41x9WNoHAfqpSmyrztAgf2IZYC3';
 let resetUnsubscribe=null,resetState={},resetReady=false;
+let resetSources={legacy:{},english:{},math:{}};
 let db,uid='',code='',role='',slot='',room=null,unsubscribe=null,solo=null;
 let clock=null,busy=false,previousStageKey='',lastClockText='';
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -102,103 +104,7 @@ function gapClear(){if(gapStation===null)return;gapSave(gapStation,[]);gapRender
 // Grammar: Original order of normal exercises; no Diff corner.
 // A blank item has prefix/suffix, accepted answers, and optional hint.
 // Open sentences are self-checked against examples, not automatically marked wrong.
-const GRAMMAR=[
- {title:'Station 1 · Grammar',tasks:[
-  {title:'1 · Put in the right adverbs',items:[
-   ['When Beth tried horse riding, she rode ',' (careful).',['carefully']],
-   ['Katie won the rock climbing competition ',' (easy).',['easily']],
-   ['Jerry is a fantastic rugby player because he can run ',' (fast).',['fast']],
-   ['When the students play rugby, their teacher calls ',' (loud) to them.',['loudly']],
-   ['Tom works ',' (hard) to become a good tennis player.',['hard']],
-   ['Everyone says that Tom plays ',' (brilliant).',['brilliantly']]
-  ],example:'Mark learned the rules quickly (quick).'},
-  {title:'2 · Adjective or adverb? Put in the right form',intro:'Last week Mark’s class went on a school trip. They tried outdoor rock climbing.',items:[
-   ['Everyone was ',' (excited).',['excited']],
-   ['Their instructor told them that climbing is a ',' (dangerous) sport if you aren’t careful.',['dangerous']],
-   ['Their instructor told them that climbing is a dangerous sport if you aren’t ',' (careful).',['careful']],
-   ['So the students borrowed helmets and other equipment to keep them ',' (safe).',['safe']],
-   ['Then they started to climb ',' (slow).',['slowly']],
-   ['After some time they were all ',' (hungry).',['hungry']],
-   ['“Oh, look at the weather,” the instructor said. “It’s going to rain ',' (heavy) soon. Let’s go back!”',['heavily']],
-   ['The students ate their sandwiches ',' (quick) and climbed down again.',['quickly']],
-   ['Everything went ',' (good) and they got back home safely.',['well']],
-   ['Everything went well and they got back home ',' (safe).',['safely']]
-  ]},
-  {title:'3 · Put in the right form',intro:'Wörter: myself · yourself · himself · herself · ourselves · themselves · each other',items:[
-   ['Beth enjoyed ',' at the activity centre.',['herself']],
-   ['Mark hurt ',' when he tried horse riding.',['himself']],
-   ['The rugby players watched ',' in a video of the last rugby game.',['themselves']],
-   ['This morning I made ',' breakfast.',['myself']],
-   ['Teacher: “Did you do your homework ','?”',['yourself']],
-   ['We made ',' pizza for dinner.',['ourselves']],
-   ['Laura and her friend haven’t seen ',' for a long time.',['each other']]
-  ]},
-  {title:'4 · Write four sentences about rugby',intro:'Use adjectives and adverbs. Wörter: popular · fast · quick · slow · easy · safe',open:[
-   'Rugby is a popular sport.', 'It is a fast sport too.',
-   'The players must run quickly.', 'You can learn the rules easily.'
-  ]}
- ]},
- {title:'Station 2 · Grammar',tasks:[
-  {title:'1 · Put in the right verb forms',example:'An old man has cut (cut) his finger.',items:[
-   ['A little boy has ',' (burn) his hand.',['burnt','burned']],
-   ['A young girl has ',' (break) her leg.',['broken']],
-   ['Linda has ',' (give) a woman some tablets.',['given']],
-   ['Four people have ',' (have) an accident.',['had']],
-   ['Two women have ',' (sprain) their ankles.',['sprained']],
-   ['Three men have ',' (hurt) their heads.',['hurt']]
-  ]},
-  {title:'2 · Megan works for the emergency services. Make sentences',intro:'Use the present perfect. Vorgaben in Arbeitsblatt-Reihenfolge: work on the computer · open the window · hang up her uniform · drink tea · make a phone call · write a message.',open:[
-   'Megan has already worked on the computer.',
-   'She has already opened the window.',
-   'She has already hung up her uniform.',
-   'She has already drunk tea.',
-   'She has already made a phone call.',
-   'She has already written a message.'
-  ]},
-  {title:'3 · What has happened? Write six sentences in the present perfect',intro:'Use these verbs in order: fall off · hurt · come · arrive · put · take. Example: There has been an accident. Die Bildaufgabe wird hier mit Satzhinweisen geübt.',open:[
-   'A boy has fallen off his bike.',
-   'He has hurt his leg.',
-   'Two police officers have come.',
-   'An ambulance has arrived.',
-   'The doctor has put a bandage on the boy’s leg.',
-   'The dogs have taken the sausages.'
-  ]},
-  {title:'4 · Complete the sentences. Use the present perfect',intro:'Jamie: watch TV ✓, phone his brother ✗. Kim: have football training ✓, do her homework ✗. Max and Lucy: play tennis ✓, be to the hospital ✗. My friend and I: go shopping ✓, buy a present ✗.',example:'Jamie has already watched TV. He hasn’t phoned his brother yet.',items:[
-   ['1. Kim ',' football training.',['has already had']],
-   ['   She ',' her homework yet.',['hasn’t done',"hasn't done"]],
-   ['2. Max and Lucy ',' tennis.',['have already played']],
-   ['   They ',' to the hospital yet.',['haven’t been',"haven't been"]],
-   ['3. My friend and I ',' shopping.',['have already gone']],
-   ['   We ',' a present yet.',['haven’t bought',"haven't bought"]]
-  ]},
-  {title:'5 · What about you? Write two sentences',intro:'What have you already done? What haven’t you done yet? Schreibe zwei eigene Sätze.',open:[
-   'I have already helped my grandparents in the garden.',
-   'I haven’t finished my homework yet.'
-  ]},
-  {title:'6 · Make questions and answer them. Give short answers',intro:'Example: you and your family / ever / be to Wales? → Have you and your family ever been to Wales? → Yes, we have. / No, we haven’t.',open:[
-   'Have you ever won a prize? | Yes, I have. / No, I haven’t.',
-   'Has your best friend ever been in hospital? | Yes, he/she has. / No, he/she hasn’t.',
-   'Has your best friend ever had a cast? | Yes, he/she has. / No, he/she hasn’t.',
-   'Have your friends ever tried rock climbing? | Yes, they have. / No, they haven’t.'
-  ],prompts:[
-   'you / ever / win a prize?',
-   'your best friend / ever / be in hospital?',
-   'your best friend / ever / have a cast?',
-   'your friends / ever / try rock climbing?'
-  ]},
-  {title:'7 · Complete the dialogue. Use the simple past or the present perfect',intro:'Ellie and Brad talk about the activity centre and Brad’s accident.',items:[
-   ['Ellie: Hello Brad. How are you? ',' you already visited (visit) the new activity centre?',['Have']],
-   ['Brad: No, I ',' (not visit) it yet.',['haven’t visited',"haven't visited"]],
-   ['I ',' (have) a little accident last week.',['had']],
-   ['Ellie: Oh, no! What happened? Brad: I ',' (fall) off my skateboard',['fell']],
-   [' and ',' (twist) my knee last Friday.',['twisted']],
-   ['Ellie: ',' you been (be) to the doctor yet?',['Have']],
-   ['Brad: Yes, I ',' already seen (see) a doctor.',['have']],
-   ['I ',' (go) to the hospital yesterday.',['went']],
-   ['They ',' (give) me a bandage and some tablets. It’s not so bad. Don’t worry. Ellie: I hope you get better soon.',['gave']]
-  ]}
- ]}
-];
+
 let grammarStation=null,grammarTask=null;
 function grammarKey(st,task){return `vb2grammar_${soloName}_station${st+1}_task${task+1}`;}
 function grammarRead(st,task){try{const v=JSON.parse(localStorage.getItem(grammarKey(st,task))||'[]');return Array.isArray(v)?v:[];}catch{return [];}}
@@ -265,14 +171,16 @@ function applyResetState(state){
 function watchResets(){
  if(resetUnsubscribe){resetUnsubscribe();resetUnsubscribe=null;}
  resetReady=false;
- resetUnsubscribe=onValue(ref(db,'learningResets'),snap=>applyResetState(snap.val()),e=>msg('Reset-Abgleich fehlgeschlagen: '+e.message,true));
+ const refresh=()=>applyResetState({...resetSources.legacy,...Object.fromEntries(Object.entries(resetSources.english).map(([n,t])=>['english_'+n,t])),...Object.fromEntries(Object.entries(resetSources.math).map(([n,t])=>['math_'+n,t]))});
+ const offs=[['learningResets','legacy'],['learningResetsEnglish','english'],['learningResetsMath','math']].map(([path,key])=>onValue(ref(db,path),snap=>{resetSources[key]=snap.val()||{};refresh();},e=>msg('Reset-Abgleich fehlgeschlagen: '+e.message,true)));
+ resetUnsubscribe=()=>offs.forEach(fn=>fn());
 }
 
 function stopSoloHeartbeat(){if(soloHeartbeat!==null){clearInterval(soloHeartbeat);soloHeartbeat=null;}}
 function startSoloHeartbeat(){stopSoloHeartbeat();soloHeartbeat=setInterval(()=>{if(solo&&soloName)void syncSolo();},30000);}
 function stopDashboard(){if(dashboardUnsubscribe){dashboardUnsubscribe();dashboardUnsubscribe=null;}}
 function stopClock(){if(clock!==null){clearInterval(clock);clock=null;}lastClockText='';}
-function home(){stopDashboard();stopSoloHeartbeat();if(unsubscribe){unsubscribe();unsubscribe=null;}stopClock();code='';role='';slot='';room=null;solo=null;busy=false;previousStageKey='';status.textContent='';app.innerHTML=card(`<h2>Was möchtest du machen?</h2><div class="buttons">${btn('👥 Spiel beitreten','join')}${btn('🇬🇧 Englisch','solo')}${btn('🔢 Mathe Klasse 7 NRW','mathChoose')}</div>`)+card('<p class="muted">Hier kannst du alleine lernen oder mit einem Raumcode am Battle teilnehmen. Alle vier Kinder können gleichzeitig auf ihren eigenen Geräten lernen.</p>');}
+function home(){gbStop();stopDashboard();stopSoloHeartbeat();if(unsubscribe){unsubscribe();unsubscribe=null;}stopClock();code='';role='';slot='';room=null;solo=null;busy=false;previousStageKey='';status.textContent='';app.innerHTML=card(`<h2>Was möchtest du machen?</h2><div class="buttons">${btn('🏆 Grammatik-Battle beitreten','gbJoinForm')}${btn('👥 Spiel beitreten','join')}${btn('🇬🇧 Englisch','solo')}${btn('🔢 Mathe Klasse 7 NRW','mathChoose')}</div>`)+card('<p class="muted">Hier kannst du alleine lernen oder mit einem Raumcode am Battle teilnehmen. Alle vier Kinder können gleichzeitig auf ihren eigenen Geräten lernen.</p>');}
 function listen(){if(unsubscribe)unsubscribe();stopClock();unsubscribe=onValue(ref(db,`rooms/${code}`),snap=>{room=snap.val();if(!room){msg('Raum nicht gefunden oder gelöscht.',true);return;}render();},e=>msg('Firebase-Zugriff verweigert: '+e.message,true));}
 function current(){const b=Number(room?.meta?.battle||1)-1;return (room?.meta?.subject==='math'?MATH_BATTLES:BATTLES)[b]?.[Number(room?.meta?.index||0)%30];}
 function players(){return Object.entries(room?.slots||{}).map(([id,p])=>({id,...p})).sort((a,b)=>(b.score||0)-(a.score||0));}
@@ -436,7 +344,28 @@ function mathAnswer(i){if(!mathRun||mathRun.index>=30)return;const q=MATH_BATTLE
 function mathMistakes(){const content=[0,1,2].map(b=>{const s=mathLoad(mathName,b),m=s?.mistakes||{};return `<h3>Battle ${b+1}</h3>`+(Object.keys(m).length?Object.entries(m).map(([i,c])=>`<p>${esc(MATH_BATTLES[b][Number(i)].q)} → <strong>${esc(MATH_BATTLES[b][Number(i)].options[MATH_BATTLES[b][Number(i)].correct])}</strong> · ${c}× falsch</p>`).join(''):'<p>Noch keine Fehler.</p>');}).join('');app.innerHTML=card(`<h2>📕 ${esc(mathName)} · Mathe-Fehlerliste</h2>${content}`)+card(btn('Zur Mathe-Übersicht','mathHome','alt'));}
 function mathAction(v){if(v==='mathChoose')mathChoose();else if(v==='mathHome')mathHome();else if(v==='mathMistakes')mathMistakes();else if(v==='mathNext')mathQuestion();else if(/^mathName[0-3]$/.test(v))mathSetName(Number(v.slice(-1)));else if(/^mathStart[012]$/.test(v))mathStart(Number(v.slice(-1)));else if(/^mathResume[012]$/.test(v))mathStart(Number(v.slice(-1)),true);else return false;return true;}
 
-document.addEventListener('click',e=>{const ma=e.target.closest('[data-mathanswer]');if(ma){mathAnswer(Number(ma.dataset.mathanswer));return;}const mathButton=e.target.closest('[data-action]');if(mathButton&&mathAction(mathButton.dataset.action))return;const a=e.target.closest('[data-action]'),ans=e.target.closest('[data-answer]'),sa=e.target.closest('[data-soloanswer]');if(ans){answer(Number(ans.dataset.answer));return;}if(sa){soloAnswer(Number(sa.dataset.soloanswer));return;}if(!a)return;const v=a.dataset.action;if(v==='home')home();else if(v==='host'||v==='createRoom'||v==='dashboard'||v==='start'||v==='reset')return;else if(v==='join')joinForm();else if(v==='enter')enter();else if(['start','reset'].includes(v))hostAction(v);else if(v==='solo')soloChooseName();else if(v==='dashboard')void showDashboard();else if(v==='soloChangeName')soloChooseName();else if(v==='soloMistakes')showMyMistakes();else if(v==='soloHome')soloHome();else if(v==='grammarMenu')grammarMenu();else if(v==='grammarStation0')grammarStationMenu(0);else if(v==='grammarStation1')grammarStationMenu(1);else if(/^grammarTask\d+$/.test(v)){const n=Number(v.slice(11));if(grammarStation!==null&&n<GRAMMAR[grammarStation].tasks.length)grammarRender(grammarStation,n);}else if(v==='grammarCheck')grammarCheck();else if(v==='grammarReveal')grammarReveal();else if(v==='grammarClear')grammarClear();else if(v==='grammarBack')grammarStationMenu(grammarStation);else if(v==='gap0')gapRender(0);else if(v==='gap1')gapRender(1);else if(v==='gapCheck')gapCheck();else if(v==='gapClear')gapClear();else if(/^soloName[0-3]$/.test(v))soloSetName(Number(v.slice(-1)));else if(/^soloStart[012]$/.test(v))soloStart(Number(v.slice(-1)));else if(/^soloResume[012]$/.test(v))soloResume(Number(v.slice(-1)));else if(v==='soloNext')soloNext();});
+
+// Grammatik-Battle: Originalaufgaben, Texteingaben und Bewertung durch den Schiedsrichter.
+const GB_TIME=45000;
+let gbCode='',gbRoom=null,gbOff=null,gbBusy=false,gbTimer=null;
+const gbNorm=s=>String(s||'').trim().toLowerCase().replace(/[’‘]/g,"'").replace(/\s+/g,' ');
+const gbQuestions=st=>GRAMMAR[st].tasks.flatMap((t,ti)=> (t.items||t.open||[]).map((item,i)=>({task:ti,number:i+1,title:t.title,intro:t.intro||'',prompt:t.items?item[0]+' _____ '+item[1]:(t.prompts?.[i]||'Schreibe einen vollständigen englischen Satz.'),accepted:t.items?item[2]:null,example:t.open?.[i]||null})));
+function gbStop(){if(gbOff){gbOff();gbOff=null;}if(gbTimer){clearInterval(gbTimer);gbTimer=null;}gbRoom=null;gbCode='';}
+function gbListen(){if(gbOff)gbOff();gbOff=onValue(ref(db,`grammarRooms/${gbCode}`),s=>{gbRoom=s.val();if(!gbRoom){msg('Grammatik-Raum nicht gefunden.',true);return;}gbRender();},e=>msg('Grammatik-Battle: '+e.message,true));}
+function gbPlayers(){return Object.entries(gbRoom?.slots||{}).map(([id,v])=>({id,...v})).sort((a,b)=>(b.score||0)-(a.score||0));}
+function gbRanking(){return gbPlayers().map((p,i)=>`<div class="player row"><span>${i+1}. ${esc(p.name)}</span><strong>${p.score||0} P</strong></div>`).join('')||'<p>Warte auf Spieler.</p>';}
+function gbClock(){if(!gbRoom||gbRoom.meta?.stage!=='question')return;const el=document.querySelector('#gb-clock');if(el)el.textContent='⏱️ '+Math.max(0,Math.ceil((Number(gbRoom.meta.deadline||0)-Date.now())/1000))+' Sekunden';}
+
+function gbJoinForm(){app.innerHTML=card('<h2>🏆 Grammatik-Battle beitreten</h2><label>Raumcode<input id="gb-code" inputmode="numeric" maxlength="6" placeholder="6-stelliger Code"></label><label>Dein Name<select id="gb-name">'+names.map(n=>`<option>${n}</option>`).join('')+'</select></label>'+btn('Beitreten','gbJoin'))+card(btn('Zurück','home','alt'));}
+async function gbJoin(){const c=document.querySelector('#gb-code')?.value.trim(),name=document.querySelector('#gb-name')?.value;if(!/^\d{6}$/.test(c)){msg('Bitte sechsstelligen Code eingeben.',true);return;}try{const s=await get(ref(db,`grammarRooms/${c}`));if(!s.exists()){msg('Raum nicht gefunden.',true);return;}const r=s.val();const slot=String(names.indexOf(name)+1);if(r.slots?.[slot]?.uid!==uid&&r.slots?.[slot]){msg('Dieser Name ist bereits belegt.',true);return;}if(!r.slots?.[slot]){if(r.meta?.stage!=='lobby'){msg('Das Battle läuft bereits.',true);return;}await set(ref(db,`grammarRooms/${c}/slots/${slot}`),{uid,name,score:0});}gbStop();gbCode=c;gbListen();}catch(e){msg('Beitritt fehlgeschlagen: '+e.message,true);}}
+function gbRender(){const m=gbRoom.meta||{},qs=gbQuestions(Number(m.station||0)),q=qs[Number(m.index||0)],stage=m.stage;let out=card(`<h2>🏆 Grammatik · Station ${Number(m.station)+1}</h2><p>Raum ${esc(gbCode)} · ${stage==='finished'?'Fertig':`Aufgabe ${Number(m.index)+1} von ${qs.length}`}</p>${gbRanking()}`);
+if(stage==='lobby')out+=card('<h3>Warteraum</h3><p>Warte auf den Schiedsrichter.</p>');
+if(stage==='question'&&q){const mine=gbRoom.submissions?.[m.index]?.[uid],review=gbRoom.reviews?.[m.index]?.[uid];out+=card(`<h3>${esc(q.title)}</h3><p>${esc(q.intro)}</p><p><strong>${esc(q.prompt)}</strong></p><p id="gb-clock"></p>`+(mine?`<p>Deine Antwort: <strong>${esc(mine.text)}</strong></p><p>${review?(review.correct?'✅ 10 Punkte':'❌ 0 Punkte'):'Antwort abgegeben. Warte auf die Bewertung.'}</p>`:`<label>Deine Antwort<textarea id="gb-answer" rows="3" placeholder="Antwort selbst schreiben" spellcheck="false"></textarea></label>${btn('Antwort abgeben','gbSubmit')}`));}
+if(stage==='finished')out+=card('<h2>🏆 Geschafft!</h2>'+gbRanking());
+app.innerHTML=out+card(btn('Zur Startseite','home','alt'));if(gbTimer)clearInterval(gbTimer);if(stage==='question'){gbTimer=setInterval(gbClock,1000);gbClock();}}
+async function gbSubmit(){const m=gbRoom?.meta;if(!m||m.stage!=='question'||gbRoom.submissions?.[m.index]?.[uid])return;const textValue=document.querySelector('#gb-answer')?.value.trim();if(!textValue){msg('Bitte zuerst eine Antwort eingeben.',true);return;}if(textValue.length>1200){msg('Antwort ist zu lang.',true);return;}try{await set(ref(db,`grammarRooms/${gbCode}/submissions/${m.index}/${uid}`),{text:textValue,at:Date.now()});}catch(e){msg('Antwort konnte nicht gespeichert werden: '+e.message,true);}}
+
+document.addEventListener('click',e=>{const ga=e.target.closest('[data-action]')?.dataset.action;if(ga==='gbJoinForm'){gbJoinForm();return;}if(ga==='gbJoin'){void gbJoin();return;}if(ga==='gbSubmit'){void gbSubmit();return;}const ma=e.target.closest('[data-mathanswer]');if(ma){mathAnswer(Number(ma.dataset.mathanswer));return;}const mathButton=e.target.closest('[data-action]');if(mathButton&&mathAction(mathButton.dataset.action))return;const a=e.target.closest('[data-action]'),ans=e.target.closest('[data-answer]'),sa=e.target.closest('[data-soloanswer]');if(ans){answer(Number(ans.dataset.answer));return;}if(sa){soloAnswer(Number(sa.dataset.soloanswer));return;}if(!a)return;const v=a.dataset.action;if(v==='home')home();else if(v==='host'||v==='createRoom'||v==='dashboard'||v==='start'||v==='reset')return;else if(v==='join')joinForm();else if(v==='enter')enter();else if(['start','reset'].includes(v))hostAction(v);else if(v==='solo')soloChooseName();else if(v==='dashboard')void showDashboard();else if(v==='soloChangeName')soloChooseName();else if(v==='soloMistakes')showMyMistakes();else if(v==='soloHome')soloHome();else if(v==='grammarMenu')grammarMenu();else if(v==='grammarStation0')grammarStationMenu(0);else if(v==='grammarStation1')grammarStationMenu(1);else if(/^grammarTask\d+$/.test(v)){const n=Number(v.slice(11));if(grammarStation!==null&&n<GRAMMAR[grammarStation].tasks.length)grammarRender(grammarStation,n);}else if(v==='grammarCheck')grammarCheck();else if(v==='grammarReveal')grammarReveal();else if(v==='grammarClear')grammarClear();else if(v==='grammarBack')grammarStationMenu(grammarStation);else if(v==='gap0')gapRender(0);else if(v==='gap1')gapRender(1);else if(v==='gapCheck')gapCheck();else if(v==='gapClear')gapClear();else if(/^soloName[0-3]$/.test(v))soloSetName(Number(v.slice(-1)));else if(/^soloStart[012]$/.test(v))soloStart(Number(v.slice(-1)));else if(/^soloResume[012]$/.test(v))soloResume(Number(v.slice(-1)));else if(v==='soloNext')soloNext();});
 document.addEventListener('input',e=>{if(e.target.matches('[data-gap]'))gapCollect();if(e.target.matches('[data-grammar]'))grammarCollect();});
 document.addEventListener('change',e=>{if(e.target.matches('[data-grammar]'))grammarCollect();});
 document.addEventListener('focusout',e=>{if(e.target.matches('[data-grammar]'))grammarCollect();});
