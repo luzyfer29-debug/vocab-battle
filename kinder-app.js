@@ -12,6 +12,67 @@ const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&
 const btn=(t,fn,cl='')=>`<button ${cl?`class="${cl}"`:''} data-action="${fn}">${t}</button>`;
 const card=s=>`<section class="card">${s}</section>`;
 const msg=(s,bad=false)=>status.innerHTML=`<p class="${bad?'error':'good'}">${esc(s)}</p>`;
+// Lueckentexte aus den beiden vom Nutzer bereitgestellten Loesungsblaettern.
+// Reihenfolge und Wortlaut der Saetze bleiben wie auf den Vorlagen.
+const GAP_SETS=[
+ {title:'Lückentext 1 · Station 1',groups:[{title:'Julies Nachricht an Beth · Aufgabe 4',parts:[
+  'Hi Beth,\n\nHow was your trip to the activity centre?\n\nYou know I love ',
+  ' (Freiluft-) activities, so I tried canoeing last weekend. Our group took a trip down the River Wye.\n\nThe trip wasn’t ',
+  ' (gefährlich), of course, but we had to wear special ',
+  ' (Ausrüstung) to keep us ',
+  ' (sicher).\n\nGuess what? I wasn’t so bad. We had a friendly and ',
+  ' (geduldig) instructor. She said I was very ',
+  ' (begabt). ☺\n\nMara was there too. She’s a really ',
+  ' (leistungsorientiert) girl and always wants to be most ',
+  ' (erfolgreich). She was even ',
+  ' (frech) to me. Well, forget about that …\n\nThe canoeing trip was great fun. In the evening I was ',
+  ' (erschöpft) too, but I had a fantastic day.\n\nSee you soon!\nJulie'
+ ],answers:[['outdoor'],['dangerous'],['equipment'],['safe'],['patient'],['talented'],['competitive'],['successful'],['cheeky'],['exhausted']]}]},
+ {title:'Lückentext 2 · Station 2',groups:[
+  {title:'Aufgabe 2 · Complete the sentences',parts:[
+   'Example: I have a sore throat. I need my scarf.\n\n1. “Look, there has been an ',
+   '. We must call an ambulance!”\n\n2. When I cut my finger, it started to ',
+   ' badly.\n\n3. Your ',
+   ' is a part of your leg.\n\n4. When you ',
+   ' your ankle, you should put a bandage on it.\n\n5. “Yummy! Our pizza is ready. Let’s take it out.” – “Be careful! It’s hot. Don’t ',
+   ' your hand when you take it out.”\n\n6. Call 999 for the ',
+   ' services in the UK.'
+  ],answers:[['accident'],['bleed'],['knee'],['sprain','twist','hurt'],['burn'],['emergency']]},
+  {title:'Aufgabe 3 · Put in the right verb',parts:[
+   '1. You ',
+   ' (have / make) an accident.\n\n2. You ',
+   ' (invite / call) the operator.\n\n3. You ',
+   ' (give / ask) your name on the phone.\n\n4. You ',
+   ' (speak / say) where you are.\n\n5. You ',
+   ' (stay with / wait for) the hurt person.\n\n6. You ',
+   ' (take / bring) a person to hospital.'
+  ],answers:[['have'],['call'],['give'],['say'],['stay with'],['take']]}
+ ]}
+];
+let gapStation=null;
+function gapStorageKey(n){return `vb2gap_${soloName}_station_${n+1}`;}
+function gapLoad(n){try{const v=JSON.parse(localStorage.getItem(gapStorageKey(n))||'null');return Array.isArray(v)?v:[];}catch{return [];}}
+function gapSave(n,values){localStorage.setItem(gapStorageKey(n),JSON.stringify(values));}
+function gapFields(n){return GAP_SETS[n].groups.flatMap(g=>g.answers);}
+function gapRender(n,checked=false){
+ if(!soloName){soloChooseName();return;}
+ gapStation=n;const data=GAP_SETS[n],saved=gapLoad(n),answers=gapFields(n);let pos=0;
+ const body=data.groups.map(group=>{
+  let html='';for(let i=0;i<group.answers.length;i++){
+   const idx=pos++,value=String(saved[idx]||''),correct=group.answers[i].some(a=>a.toLocaleLowerCase('en')===value.trim().toLocaleLowerCase('en'));
+   html+=esc(group.parts[i]).replace(/\n/g,'<br>');
+   html+=`<input data-gap="${idx}" aria-label="Lücke ${idx+1}" autocomplete="off" autocapitalize="none" spellcheck="false" value="${esc(value)}" style="display:inline-block;vertical-align:middle;max-width:175px;width:42%;min-width:105px;margin:5px 4px;padding:9px;border:2px solid ${checked?(correct?'#6ee7a8':'#ff8d8d'):'#8c86bd'};border-radius:9px;background:#fff;color:#17152b;font-size:16px">`;
+   if(checked&&!correct)html+=`<span style="color:#ffb0b0;font-weight:600"> (${esc(group.answers[i].join(' / '))})</span>`;
+  }
+  html+=esc(group.parts[group.answers.length]).replace(/\n/g,'<br>');
+  return `<h3>${esc(group.title)}</h3><p style="line-height:2.7;overflow-wrap:anywhere">${html}</p>`;
+ }).join('');
+ const count=answers.filter((a,i)=>a.some(x=>x.toLowerCase()===String(saved[i]||'').trim().toLowerCase())).length;
+ app.innerHTML=card(`<h2>✍️ ${esc(data.title)}</h2><p>Schreibe die englischen Wörter in die Lücken. Die Reihenfolge entspricht dem Arbeitsblatt. Deine Eingaben bleiben auf diesem Gerät gespeichert.</p>${checked?`<p class="good"><strong>${count} von ${answers.length} richtig.</strong> Rote Lücken kannst du verbessern und erneut prüfen.</p>`:''}${body}<div class="buttons">${btn('✅ Antworten prüfen','gapCheck')}${btn('🔄 Lücken leeren','gapClear','alt')}</div>`)+card(btn('Zur Battle-Auswahl','soloHome','alt'));
+}
+function gapCollect(){if(gapStation===null)return;gapSave(gapStation,Array.from(document.querySelectorAll('[data-gap]'),el=>el.value));}
+function gapCheck(){if(gapStation===null)return;gapCollect();gapRender(gapStation,true);}
+function gapClear(){if(gapStation===null)return;gapSave(gapStation,[]);gapRender(gapStation);}
 const key='vb2solo';
 const SOLO_NAMES=['Luca','Semir','Talea','Nele'];
 let soloName=localStorage.getItem('vb2solo_name')||'';
@@ -71,7 +132,7 @@ function soloSaved(b){try{const s=JSON.parse(localStorage.getItem(soloKey(b))||'
 async function syncSolo(){if(!uid||!db||!solo||!soloName)return;try{await set(ref(db,`soloProgress/${uid}/${soloName}/battle${solo.battle+1}`),{name:soloName,battle:solo.battle+1,done:solo.index,correct:Math.floor(solo.score/10),score:solo.score,finished:!!solo.finished,mistakes:cleanMistakes(solo.mistakes),updatedAt:Date.now()});}catch(e){msg('Online-Speicherung noch nicht möglich: '+e.message,true);}}
 function soloChooseName(){stopSoloHeartbeat();app.innerHTML=card(`<h2>📚 Wer lernt gerade?</h2><p>Wähle deinen Namen, damit der Schiedsrichter deinen Lernfortschritt sehen kann.</p><div class="buttons">${SOLO_NAMES.map((n,i)=>btn(esc(n),`soloName${i}`)).join('')}</div>`)+card(btn('Zurück','home','alt'));}
 function soloSetName(i){soloName=SOLO_NAMES[i];localStorage.setItem('vb2solo_name',soloName);soloHome();}
-function soloHome(){stopSoloHeartbeat();if(!soloName){soloChooseName();return;}solo=null;app.innerHTML=card(`<h2>📚 ${esc(soloName)} · Battle auswählen</h2><p>30 Fragen pro Battle. Falsche Wörter werden danach wiederholt. Der Fortschritt wird auf diesem Handy und zusätzlich online gespeichert.</p>${[0,1,2].map(b=>{const saved=soloSaved(b),done=saved?.index||0;const reviewing=saved&&!saved.finished&&saved.review&&saved.wrong.length;return `<div class="player"><h3>Battle ${b+1}</h3><p>${done} von 30 Fragen erledigt${reviewing?` · 🔁 ${saved.wrong.length} Wörter üben`:''}${saved?.finished?' · abgeschlossen':''}</p><div class="buttons">${btn(saved?'Neu beginnen':'Starten',`soloStart${b}`)}${saved&&!saved.finished?btn('Fortsetzen',`soloResume${b}`,'alt'):''}</div></div>`;}).join('')}${btn('📕 Meine Fehlerliste','soloMistakes','alt')}${btn('Anderen Namen wählen','soloChangeName','alt')}`)+card(btn('Zurück','home','alt'));}
+function soloHome(){stopSoloHeartbeat();if(!soloName){soloChooseName();return;}solo=null;app.innerHTML=card(`<h2>📚 ${esc(soloName)} · Battle auswählen</h2><p>30 Fragen pro Battle. Falsche Wörter werden danach wiederholt. Der Fortschritt wird auf diesem Handy und zusätzlich online gespeichert.</p>${[0,1,2].map(b=>{const saved=soloSaved(b),done=saved?.index||0;const reviewing=saved&&!saved.finished&&saved.review&&saved.wrong.length;return `<div class="player"><h3>Battle ${b+1}</h3><p>${done} von 30 Fragen erledigt${reviewing?` · 🔁 ${saved.wrong.length} Wörter üben`:''}${saved?.finished?' · abgeschlossen':''}</p><div class="buttons">${btn(saved?'Neu beginnen':'Starten',`soloStart${b}`)}${saved&&!saved.finished?btn('Fortsetzen',`soloResume${b}`,'alt'):''}</div></div>`;}).join('')}${btn('✍️ Lückentext 1 · Station 1','gap0')}${btn('✍️ Lückentext 2 · Station 2','gap1')}${btn('📕 Meine Fehlerliste','soloMistakes','alt')}${btn('Anderen Namen wählen','soloChangeName','alt')}`)+card(btn('Zurück','home','alt'));}
 function soloStart(b){const previous=soloSaved(b);solo={battle:b,index:0,score:0,finished:false,wrong:[],review:false,reviewPos:0,mistakes:cleanMistakes(previous?.mistakes)};soloSave();soloQuestion();}
 function soloResume(b){solo=soloSaved(b);if(!solo){soloStart(b);return;}void syncSolo();if(solo.finished)soloFinished();else soloQuestion();}
 function soloQuestion(){if(!solo)return;startSoloHeartbeat();const b=solo.battle;
@@ -128,5 +189,6 @@ function showDashboard(){
  if(!uid){msg('Bitte kurz warten, bis die Anmeldung abgeschlossen ist.',true);return;}
  dashboardUnsubscribe=onValue(ref(db,'soloProgress'),snap=>{renderDashboard(snap.val());},e=>msg('Lernübersicht konnte nicht geladen werden: '+e.message,true));
 }
-document.addEventListener('click',e=>{const a=e.target.closest('[data-action]'),ans=e.target.closest('[data-answer]'),sa=e.target.closest('[data-soloanswer]');if(ans){answer(Number(ans.dataset.answer));return;}if(sa){soloAnswer(Number(sa.dataset.soloanswer));return;}if(!a)return;const v=a.dataset.action;if(v==='home')home();else if(v==='host'||v==='createRoom'||v==='dashboard'||v==='start'||v==='reset')return;else if(v==='join')joinForm();else if(v==='enter')enter();else if(['start','reset'].includes(v))hostAction(v);else if(v==='solo')soloChooseName();else if(v==='dashboard')void showDashboard();else if(v==='soloChangeName')soloChooseName();else if(v==='soloMistakes')showMyMistakes();else if(v==='soloHome')soloHome();else if(/^soloName[0-3]$/.test(v))soloSetName(Number(v.slice(-1)));else if(/^soloStart[012]$/.test(v))soloStart(Number(v.slice(-1)));else if(/^soloResume[012]$/.test(v))soloResume(Number(v.slice(-1)));else if(v==='soloNext')soloNext();});
+document.addEventListener('click',e=>{const a=e.target.closest('[data-action]'),ans=e.target.closest('[data-answer]'),sa=e.target.closest('[data-soloanswer]');if(ans){answer(Number(ans.dataset.answer));return;}if(sa){soloAnswer(Number(sa.dataset.soloanswer));return;}if(!a)return;const v=a.dataset.action;if(v==='home')home();else if(v==='host'||v==='createRoom'||v==='dashboard'||v==='start'||v==='reset')return;else if(v==='join')joinForm();else if(v==='enter')enter();else if(['start','reset'].includes(v))hostAction(v);else if(v==='solo')soloChooseName();else if(v==='dashboard')void showDashboard();else if(v==='soloChangeName')soloChooseName();else if(v==='soloMistakes')showMyMistakes();else if(v==='soloHome')soloHome();else if(v==='gap0')gapRender(0);else if(v==='gap1')gapRender(1);else if(v==='gapCheck')gapCheck();else if(v==='gapClear')gapClear();else if(/^soloName[0-3]$/.test(v))soloSetName(Number(v.slice(-1)));else if(/^soloStart[012]$/.test(v))soloStart(Number(v.slice(-1)));else if(/^soloResume[012]$/.test(v))soloResume(Number(v.slice(-1)));else if(v==='soloNext')soloNext();});
+document.addEventListener('input',e=>{if(e.target.matches('[data-gap]'))gapCollect();});
 home();try{const fb=initializeApp(firebaseConfig),auth=getAuth(fb);db=getDatabase(fb);onAuthStateChanged(auth,u=>{if(u)uid=u.uid;else signInAnonymously(auth).catch(e=>msg('Anmeldung fehlgeschlagen: '+e.message,true));});}catch(e){msg('Firebase-Konfiguration fehlerhaft: '+e.message,true);}
