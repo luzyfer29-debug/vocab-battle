@@ -4,5 +4,5 @@ window.addEventListener('error',function(e){const el=document.getElementById('st
 window.addEventListener('unhandledrejection',function(e){const el=document.getElementById('status');if(el&&!document.getElementById('app').children.length)el.textContent='Ladefehler: '+String(e.reason?.message||e.reason||'Unbekannt');});
 </script>
 <script type="module">
-import('./app.js?v=listening20261011a').catch(e=>{document.getElementById('status').textContent='Startfehler: '+String(e.message||e);});
+import('./app.js?v=listeningbattle20261011b').catch(e=>{document.getElementById('status').textContent='Startfehler: '+String(e.message||e);});
 </script></body></html>
