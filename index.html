@@ -8,7 +8,7 @@ window.addEventListener('error', event => {
 window.addEventListener('unhandledrejection', event => {
   status.textContent = 'Startfehler: ' + String(event.reason?.stack || event.reason || 'Unbekannter Fehler');
 });
-import('./app.js?v=vocab-battle-only-start-20261012-0054').then(() => {
+import('./app.js?v=math-battle-box-20261012-0058').then(() => {
   if (status.textContent === 'App wird gestartet …') status.textContent = '';
 }).catch(error => {
   status.style.whiteSpace = 'pre-wrap';
