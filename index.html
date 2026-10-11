@@ -4,24 +4,5 @@ window.addEventListener('error',function(e){const el=document.getElementById('st
 window.addEventListener('unhandledrejection',function(e){const el=document.getElementById('status');if(el&&!document.getElementById('app').children.length)el.textContent='Ladefehler: '+String(e.reason?.message||e.reason||'Unbekannt');});
 </script>
 <script type="module">
-const el=document.getElementById('status');
-const tests=[
- ['Firebase-Konfiguration','./firebase-config.js'],
- ['Englisch-Fragen','./questions.js'],
- ['Mathe-Fragen','./math-questions.js'],
- ['Grammatik-Fragen','./grammar-data.js'],
- ['Hauptprogramm','./app.js?v=diagnose20261011b']
-];
-(async()=>{
- for(const [name,path] of tests){
-  el.textContent='Prüfe: '+name+' …';
-  try{await import(path);}
-  catch(e){
-   el.style.whiteSpace='pre-wrap';
-   el.textContent='FEHLER IN: '+name+'\n'+String(e?.message||e)+'\n'+String(e?.stack||'');
-   return;
-  }
- }
- if(!document.getElementById('app').children.length)el.textContent='Alle Dateien geladen, aber die Startseite bleibt leer.';
-})().catch(e=>{el.textContent='Diagnosefehler: '+String(e?.stack||e);});
+import('./app.js?v=lueckentextbattle20261011').catch(e=>{document.getElementById('status').textContent='Startfehler: '+String(e.message||e);});
 </script></body></html>
