@@ -162,26 +162,39 @@ const key='vb2solo';
 const SOLO_NAMES=['Luca','Semir','Talea','Nele'];
 let soloName=localStorage.getItem('vb2solo_name')||'';
 let dashboardUnsubscribe=null,soloHeartbeat=null;
-function resetStamp(name,subject='english'){
- return Math.max(Number(resetState.all)||0,Number(resetState[name])||0,Number(resetState[`${subject}_${name}`])||0);
+function resetStamp(name,subject='english',module=''){return Math.max(Number(resetState.all)||0,Number(resetState[name])||0,Number(resetState[`${subject}_${name}`])||0,module?Number(resetState[`${subject}_${name}_${module}`])||0:0);}
+function clearLocalLearning(name,subject,module=''){
+ const modulePrefixes={
+  english:{
+   battle1:[{key:`vb2solo_${name}_battle_1`}],battle2:[{key:`vb2solo_${name}_battle_2`}],battle3:[{key:`vb2solo_${name}_battle_3`}],
+   grammar1:[{prefix:`vb2grammar_${name}_station1_`},{prefix:`vb2first_${name}_grammar_0_`}],grammar2:[{prefix:`vb2grammar_${name}_station2_`},{prefix:`vb2first_${name}_grammar_1_`}],
+   cloze1:[{key:`vb2gap_${name}_station_1`},{prefix:`vb2first_${name}_gap_0`}],cloze2:[{key:`vb2gap_${name}_station_2`},{prefix:`vb2first_${name}_gap_1`}],
+   listening:[{key:`vb2listen_${name}_unit2`}],reading:[{key:`vb2reading_${name}_cardiff`}],writing:[{key:`vb2writing_${name}_unit2`}]
+  },
+  math:{battle1:[{key:`vb2math_${name}_battle_1`}],battle2:[{key:`vb2math_${name}_battle_2`}],battle3:[{key:`vb2math_${name}_battle_3`}],battle4:[{key:`vb2math_${name}_battle_4`}]}
+ };
+ const targets=module?modulePrefixes[subject]?.[module]:null;
+ const match=(k,m)=>m?('prefix'in m?k.startsWith(m.prefix):k===m.key):subject==='math'?k.startsWith(`vb2math_${name}_battle_`):k.startsWith(`vb2solo_${name}_battle_`)||k.startsWith(`vb2first_${name}_`)||k.startsWith(`vb2grammar_${name}_`)||k.startsWith(`vb2gap_${name}_`)||k.startsWith(`vb2listen_${name}_`)||k===`vb2reading_${name}_cardiff`||k===`vb2writing_${name}_unit2`;
+ for(let i=localStorage.length-1;i>=0;i--){const k=localStorage.key(i);if(k&&(module?(targets||[]).some(m=>match(k,m)):match(k,null)))localStorage.removeItem(k);}
+ if(subject==='math'&&mathName===name&&(!module||module===`battle${(mathRun?.b??-1)+1}`))mathRun=null;
+ if(subject==='english'&&soloName===name){
+  const active=module==='battle'+((solo?.battle??-1)+1)||module==='listening'&&!!listeningRun||module==='grammar'+((grammarStation??-1)+1)||module==='cloze'+((gapStation??-1)+1);
+  if(!module||active){solo=null;listeningRun=null;stopSoloHeartbeat();grammarStation=null;grammarTask=null;gapStation=null;}
+ }
 }
-function clearLocalLearning(name,subject){
- const prefixes=subject==='math'?[`vb2math_${name}_battle_`]:[`vb2solo_${name}_battle_`,`vb2first_${name}_`,`vb2grammar_${name}_`,`vb2gap_${name}_`,`vb2listen_${name}_`];
- for(let i=localStorage.length-1;i>=0;i--){const k=localStorage.key(i);if(k&&prefixes.some(p=>k.startsWith(p)))localStorage.removeItem(k);}
- if(subject==='math'&&mathName===name)mathRun=null;
- if(subject==='english'&&soloName===name){solo=null;listeningRun=null;stopSoloHeartbeat();grammarStation=null;grammarTask=null;gapStation=null;}
-}
+const RESET_MODULES={english:['battle1','battle2','battle3','grammar1','grammar2','cloze1','cloze2','listening','reading','writing'],math:['battle1','battle2','battle3','battle4']};
+function resetStateFromSources(){const state={...resetSources.legacy};for(const subject of ['english','math'])for(const [key,stamp] of Object.entries(resetSources[subject]||{})){const name=SOLO_NAMES.find(n=>key===n||key.startsWith(`${n}__`));if(!name)continue;const module=key===name?'':key.slice(name.length+2);state[`${subject}_${name}${module?'_'+module:''}`]=stamp;}return state;}
 function applyResetState(state){
  resetState=state&&typeof state==='object'?state:{};
  let activeEnglish=false,activeMath=false;
  for(const name of SOLO_NAMES){
-  for(const subject of ['english','math']){
-   const stamp=resetStamp(name,subject),seenKey=`vb2reset_seen_${subject}_${name}`;
+  for(const subject of ['english','math'])for(const module of RESET_MODULES[subject]){
+   const stamp=resetStamp(name,subject,module),seenKey=`vb2reset_seen_${subject}_${name}_${module}`;
    // Preserve previous legacy reset acknowledgement when upgrading.
    const oldSeen=Number(localStorage.getItem(`vb2reset_seen_${name}`)||0);
-   const seen=Math.max(Number(localStorage.getItem(seenKey)||0),oldSeen);
+   const seen=Math.max(Number(localStorage.getItem(seenKey)||0),Number(localStorage.getItem(`vb2reset_seen_${subject}_${name}`)||0),oldSeen);
    if(stamp>seen){
-    clearLocalLearning(name,subject);
+    clearLocalLearning(name,subject,module);
     localStorage.setItem(seenKey,String(stamp));
     if(subject==='english'&&soloName===name)activeEnglish=true;
     if(subject==='math'&&mathName===name)activeMath=true;
@@ -195,10 +208,11 @@ function applyResetState(state){
 function watchResets(){
  if(resetUnsubscribe){resetUnsubscribe();resetUnsubscribe=null;}
  resetReady=false;
- const refresh=()=>applyResetState({...resetSources.legacy,...Object.fromEntries(Object.entries(resetSources.english).map(([n,t])=>['english_'+n,t])),...Object.fromEntries(Object.entries(resetSources.math).map(([n,t])=>['math_'+n,t]))});
+ const refresh=()=>applyResetState(resetStateFromSources());
  const offs=[['learningResets','legacy'],['learningResetsEnglish','english'],['learningResetsMath','math']].map(([path,key])=>onValue(ref(db,path),snap=>{resetSources[key]=snap.val()||{};refresh();},e=>msg('Reset-Abgleich fehlgeschlagen: '+e.message,true)));
  resetUnsubscribe=()=>offs.forEach(fn=>fn());
 }
+async function latestResetStamp(name,subject,module){const resetPath=subject==='math'?'learningResetsMath':'learningResetsEnglish';const [legacy,whole,specific]=await Promise.all([get(ref(db,`learningResets/${name}`)),get(ref(db,`${resetPath}/${name}`)),get(ref(db,`${resetPath}/${name}__${module}`))]);return Math.max(resetStamp(name,subject,module),Number(legacy.val())||0,Number(whole.val())||0,Number(specific.val())||0);}
 
 function stopSoloHeartbeat(){if(soloHeartbeat!==null){clearInterval(soloHeartbeat);soloHeartbeat=null;}}
 function startSoloHeartbeat(){stopSoloHeartbeat();soloHeartbeat=setInterval(()=>{if(solo&&soloName)void syncSolo();},30000);}
@@ -276,9 +290,8 @@ async function syncSolo(){
  const savedAt=Number(currentSolo.updatedAt)||Date.now();
  try{
   // Always check the current server reset before uploading old work.
-  const rs=await get(ref(db,'learningResets'));
-  applyResetState(rs.val());
-  if(!resetReady||solo!==currentSolo||soloName!==name||savedAt<=resetStamp(name,'english'))return;
+  const marker=await latestResetStamp(name,'english',`battle${currentSolo.battle+1}`);
+  if(!resetReady||solo!==currentSolo||soloName!==name||savedAt<=marker)return;
   await set(ref(db,`soloProgress/${device}/${name}/battle${currentSolo.battle+1}`),{
    name,battle:currentSolo.battle+1,done:currentSolo.index,
    correct:Math.floor(currentSolo.score/10),score:currentSolo.score,
@@ -317,7 +330,7 @@ function soloFinished(){if(!solo)return;stopSoloHeartbeat();solo.finished=true;s
 function listeningKey(){return `vb2listen_${soloName}_unit2`;}
 function listenLoad(){try{const v=JSON.parse(localStorage.getItem(listeningKey())||'null');if(!v||!Number.isInteger(v.index)||v.index<0||v.index>LISTENING_QUESTIONS.length||!Number.isFinite(v.score))return null;v.mistakes=cleanMistakes(v.mistakes);return v;}catch{return null;}}
 function listenSave(){if(!listeningRun||!soloName)return;listeningRun.updatedAt=Date.now();localStorage.setItem(listeningKey(),JSON.stringify(listeningRun));void syncListeningProgress();}
-async function syncListeningProgress(){if(!db||!uid||!soloName||!listeningRun||!resetReady)return;const run=listeningRun,name=soloName,device=uid,savedAt=Number(run.updatedAt)||Date.now();try{const rs=await get(ref(db,'learningResets'));applyResetState(rs.val());if(!resetReady||listeningRun!==run||soloName!==name||savedAt<=resetStamp(name,'english'))return;await set(ref(db,`soloProgress/${device}/${name}/listeningUnit2`),{name,done:run.index,total:LISTENING_QUESTIONS.length,score:run.score||0,finished:!!run.finished,mistakes:cleanMistakes(run.mistakes),runId:run.runId,updatedAt:savedAt,timestamp:savedAt});listeningSyncWarned=false;}catch(e){if(!listeningSyncWarned){listeningSyncWarned=true;msg('Listening bleibt auf diesem Handy gespeichert; Online-Speicherung gerade nicht möglich.',true);}}}
+async function syncListeningProgress(){if(!db||!uid||!soloName||!listeningRun||!resetReady)return;const run=listeningRun,name=soloName,device=uid,savedAt=Number(run.updatedAt)||Date.now();try{const marker=await latestResetStamp(name,'english','listening');if(!resetReady||listeningRun!==run||soloName!==name||savedAt<=marker)return;await set(ref(db,`soloProgress/${device}/${name}/listeningUnit2`),{name,done:run.index,total:LISTENING_QUESTIONS.length,score:run.score||0,finished:!!run.finished,mistakes:cleanMistakes(run.mistakes),runId:run.runId,updatedAt:savedAt,timestamp:savedAt});listeningSyncWarned=false;}catch(e){if(!listeningSyncWarned){listeningSyncWarned=true;msg('Listening bleibt auf diesem Handy gespeichert; Online-Speicherung gerade nicht möglich.',true);}}}
 function listenStart(){if(!resetReady){msg('Bitte kurz auf den Reset-Abgleich warten.',true);return;}const old=listenLoad();listeningRun={index:0,score:0,finished:false,mistakes:cleanMistakes(old?.mistakes),runId:`solo-${Date.now()}`,updatedAt:Date.now()};listenSave();listenQuestion();}
 function listenResume(){if(!resetReady){msg('Bitte kurz auf den Reset-Abgleich warten.',true);return;}listeningRun=listenLoad();if(!listeningRun){listenStart();return;}if(listeningRun.finished){listenFinish();return;}listenQuestion();}
 function listenQuestion(){if(!listeningRun)return;if(listeningRun.index>=LISTENING_QUESTIONS.length){listenFinish();return;}const q=LISTENING_QUESTIONS[listeningRun.index];app.innerHTML=card(`<h2>🎧 ${esc(soloName)} · Listening</h2><p>Activity weekend in Cardiff · Frage ${listeningRun.index+1} von ${LISTENING_QUESTIONS.length} · ${listeningRun.score} Punkte</p><audio controls preload="none" style="width:100%"><source src="./rl3_track3.mp3" type="audio/mpeg">Dein Browser unterstützt die Audiowiedergabe nicht.</audio><p class="muted">Höre dir den Beitrag an und wähle die passende Antwort.</p><h3>${esc(q.q)}</h3><div class="answers">${q.options.map((o,i)=>`<button data-listenanswer="${i}">${esc(o)}</button>`).join('')}</div>`)+card(btn('Zur Englisch-Auswahl','soloHome','alt'));}
@@ -366,9 +379,8 @@ async function mathSync(){
  if(!db||!uid||!mathRun||!mathName||!resetReady)return;
  const currentRun=mathRun,name=mathName,device=uid,savedAt=Number(mathRun.updatedAt)||0;
  try{
-  const rs=await get(ref(db,'learningResets'));
-  applyResetState(rs.val());
-  if(!resetReady||mathRun!==currentRun||mathName!==name||savedAt<=resetStamp(name,'math'))return;
+  const marker=await latestResetStamp(name,'math',`battle${currentRun.b+1}`);
+  if(!resetReady||mathRun!==currentRun||mathName!==name||savedAt<=marker)return;
   await set(ref(db,`mathProgress/${device}/${name}/battle${currentRun.b+1}`),{done:currentRun.index,score:currentRun.score,mistakes:currentRun.mistakes,updatedAt:savedAt,finished:!!currentRun.finished});
  }catch(e){msg('Mathe online noch nicht verfügbar – der Fortschritt bleibt auf diesem Gerät gespeichert.',true);}
 }
