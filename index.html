@@ -8,7 +8,7 @@ window.addEventListener('error', event => {
 window.addEventListener('unhandledrejection', event => {
   status.textContent = 'Startfehler: ' + String(event.reason?.stack || event.reason || 'Unbekannter Fehler');
 });
-import('./app.js?v=vokabelbattle-menu-20261011b').then(() => {
+import('./app.js?v=math-battle-20261011c').then(() => {
   if (status.textContent === 'App wird gestartet …') status.textContent = '';
 }).catch(error => {
   status.style.whiteSpace = 'pre-wrap';
