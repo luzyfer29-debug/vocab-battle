@@ -64,6 +64,8 @@ function home(){gbStop();wbStop();stopDashboard();stopSoloHeartbeat();if(unsubsc
 #app .home-block h3{margin:0 0 12px;font-size:18px}
 #app .home-battle-grid,#app .home-tools-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
 #app .home-layout button{width:100%;min-width:0;min-height:72px;padding:13px 10px;line-height:1.25;white-space:normal;overflow-wrap:anywhere;font-size:clamp(14px,4vw,18px)}
+#app .home-math-block>[data-action]{display:block;margin:14px 0;border-radius:15px;box-shadow:0 4px 0 rgba(14,12,30,.2)}
+#app .home-math-block>[data-action]:last-child{margin-bottom:2px}
 #app .home-tools-grid [data-action="join"]{grid-column:1/-1}
 #app .home-battle-grid [data-action="readingBattleChoose"],#app .home-battle-grid [data-action="writingBattleChoose"]{grid-column:1/-1}
 @media(max-width:380px){#app .home-block{padding:12px}#app .home-battle-grid,#app .home-tools-grid{gap:8px}#app .home-layout button{padding:12px 7px;font-size:14px}}
