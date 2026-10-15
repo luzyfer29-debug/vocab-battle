@@ -1,0 +1,7 @@
+<!doctype html><html lang="de"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>VOCAB BATTLE 3.0 – Modultest</title><style>body{font:18px system-ui;background:#201a42;color:white;padding:20px}section{background:#3c3265;padding:16px;margin:12px 0;border-radius:12px;overflow-wrap:anywhere}.good{color:#a5ffad}.bad{color:#ffb0b0}</style></head><body><h2>🔎 VOCAB BATTLE 3.0 – Modultest</h2><p>Hier wird geprüft, ob die JavaScript-Dateien wirklich ausgeführt werden können.</p><div id="results"><section>⏳ Test startet …</section></div><script>
+var results=document.getElementById('results');
+window.onerror=function(message,source,line){results.insertAdjacentHTML('beforeend','<section class="bad">Seitenfehler: '+String(message)+' ('+String(source)+':'+line+')</section>')};
+var names=['firebase-config.js','questions.js','math-questions.js','grammar-data.js','app.js'];
+results.textContent='';
+(async function(){for(var i=0;i<names.length;i++){var name=names[i];var row=document.createElement('section');row.textContent='⏳ '+name;results.appendChild(row);try{await import('./'+name+'?modultest=20261011c');row.className='good';row.textContent='✅ '+name+' – JavaScript erfolgreich geladen';}catch(e){row.className='bad';row.textContent='❌ '+name+' – '+(e&&e.stack||String(e));}}})();
+</script></body></html>

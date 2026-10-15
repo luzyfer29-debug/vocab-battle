@@ -90,5 +90,22 @@ export const FRACTION_MODULES = [
       {q:'Berechne ohne Klammern: 2/3 + 1/3 · 1/2',options:['1/2','5/6','1','2/3'],correct:1,explain:'Zuerst 1/3 · 1/2 = 1/6. Dann 2/3 + 1/6 = 4/6 + 1/6 = 5/6.'},
       {q:'Berechne mit Klammern: (2/3 + 1/3) : 1/2',options:['1','2','1/2','3/2'],correct:1,explain:'Klammer: 2/3 + 1/3 = 1. Dann 1 : 1/2 = 1 · 2 = 2.'}
     ]
+  },
+  {
+    id: 'probetest', title: 'Probeklassenarbeit · Brüche', shortTitle: 'Probeklassenarbeit',
+    lesson: 'Hier übst du Aufgaben aus einer Probeklassenarbeit der 7. Klasse: Brüche rechnen, Klammern beachten, eine Sachaufgabe lösen und Brüche der Größe nach ordnen. Rechne zuerst selbst. Die Lösung mit Rechenweg erscheint nur, wenn deine Antwort falsch ist.',
+    example: 'Bei 3/4 + 5/6 bringst du beide Brüche auf den Nenner 12: 9/12 + 10/12 = 19/12 = 1 7/12.',
+    questions: [
+      {q:'Rechne aus und kürze: 3/4 + 5/6',options:['19/12 = 1 7/12','8/10 = 4/5','19/10 = 1 9/10','13/12 = 1 1/12'],correct:0,explain:'Kleinster gemeinsamer Nenner: 12.\n3/4 = 9/12 und 5/6 = 10/12.\n9/12 + 10/12 = 19/12 = 1 7/12.'},
+      {q:'Rechne aus und kürze: 7/8 − 1/3',options:['13/24','5/24','6/5','13/11'],correct:0,explain:'Gemeinsamer Nenner: 24.\n7/8 = 21/24 und 1/3 = 8/24.\n21/24 − 8/24 = 13/24.'},
+      {q:'Rechne aus und kürze: 2/5 · 3/7',options:['6/35','5/12','6/12','5/35'],correct:0,explain:'Zähler mal Zähler und Nenner mal Nenner: 2 · 3 = 6 und 5 · 7 = 35.\n2/5 · 3/7 = 6/35. Der Bruch lässt sich nicht weiter kürzen.'},
+      {q:'Rechne aus und kürze: 9/10 : 3/5',options:['3/2 = 1 1/2','9/15 = 3/5','1/2','3/5'],correct:0,explain:'Drehe den zweiten Bruch um und multipliziere: 9/10 · 5/3.\n9 · 5 / (10 · 3) = 45/30.\n45/30 = 3/2 = 1 1/2.'},
+      {q:'Berechne: (2/3 + 1/4) · 3/5',options:['11/20','11/12','17/60','5/6'],correct:0,explain:'Zuerst die Klammer: 2/3 = 8/12 und 1/4 = 3/12.\n8/12 + 3/12 = 11/12.\nDann multiplizieren: 11/12 · 3/5 = 33/60 = 11/20.'},
+      {q:'Berechne: 5/6 − (1/2 + 1/3)',options:['0','1/6','5/6','1'],correct:0,explain:'Zuerst die Klammer: 1/2 = 3/6 und 1/3 = 2/6.\n3/6 + 2/6 = 5/6.\nDann 5/6 − 5/6 = 0.'},
+      {q:'Berechne: 7/8 : (2/3 − 1/4)',options:['21/10 = 2 1/10','5/12','7/12','84/96 = 7/8'],correct:0,explain:'Zuerst die Klammer: 2/3 = 8/12 und 1/4 = 3/12.\n8/12 − 3/12 = 5/12.\nDann 7/8 : 5/12 = 7/8 · 12/5 = 84/40 = 21/10 = 2 1/10.'},
+      {q:'Ein Bäcker hat 3/2 kg Mehl. Er verbraucht 5/4 kg für Brötchen und 1/3 kg für Kuchen. Was stimmt?',options:['Es fehlen 1/12 kg Mehl.','Es bleiben 1/12 kg übrig.','Es fehlen 1/4 kg Mehl.','Es bleiben 19/12 kg übrig.'],correct:0,explain:'Gesamtverbrauch: 5/4 + 1/3 = 15/12 + 4/12 = 19/12 kg.\nVorhanden sind 3/2 = 18/12 kg.\n18/12 − 19/12 = −1/12 kg. Das Minus bedeutet: Es fehlen 1/12 kg Mehl.'},
+      {q:'Ordne von klein nach groß: 1 1/4, 5/4, 1 2/3, 7/4',options:['1 1/4 = 5/4 < 1 2/3 < 7/4','5/4 < 7/4 < 1 1/4 < 1 2/3','1 2/3 < 1 1/4 = 5/4 < 7/4','7/4 < 1 1/4 = 5/4 < 1 2/3'],correct:0,explain:'Wandle die gemischten Zahlen um: 1 1/4 = 5/4 und 1 2/3 = 5/3.\nVergleiche: 5/4 = 1,25; 5/3 ≈ 1,67; 7/4 = 1,75.\nAlso gilt: 1 1/4 = 5/4 < 1 2/3 < 7/4.'},
+      {q:'Wie addierst du Brüche mit unterschiedlichen Nennern richtig?',options:['Gemeinsamen Nenner bestimmen, beide Brüche erweitern, Zähler addieren und das Ergebnis kürzen.','Zähler und Nenner direkt addieren und danach den Nenner unverändert lassen.','Nur den größeren Nenner übernehmen und die Zähler subtrahieren.','Zuerst die Brüche multiplizieren und dann den Nenner kürzen.'],correct:0,explain:'1. Bestimme einen gemeinsamen Nenner, am besten das kleinste gemeinsame Vielfache.\n2. Erweitere beide Brüche auf diesen Nenner und addiere die Zähler.\n3. Der Nenner bleibt gleich; kürze das Ergebnis, wenn möglich.'}
+    ]
   }
 ];

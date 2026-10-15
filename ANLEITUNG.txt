@@ -1,0 +1,41 @@
+Update 15.10.2026 – Proportional-Klassenarbeit und Elternübersicht
+
+1. Dieses ZIP entpacken.
+2. Den ZIP-Ordner öffnen und in vocab-battle-3-main wechseln.
+3. Alle darin enthaltenen Dateien in das Hauptverzeichnis des vorhandenen GitHub-Repositories vocab-battle-3 hochladen. Das ZIP selbst nicht als einzelne Datei hochladen.
+4. Gleichnamige Dateien ersetzen und die Änderungen mit „Commit changes“ speichern.
+5. Kinderseite öffnen: https://luzyfer29-debug.github.io/vocab-battle-3/kinder.html
+6. Eltern-/Schiedsrichterseite öffnen: https://luzyfer29-debug.github.io/vocab-battle-3/
+
+Eltern-Live-Übersicht
+- Die Themen sind fachlich getrennt: Bruchrechnung, Mathe-Klassenarbeit, Rationale Zahlen, Proportional / Antiproportional und Englisch.
+- Proportional / Antiproportional steht als eigener Bereich und enthält das Übungsbattle sowie drei Klassenarbeiten. Das dritte Mathe-Battle startet Klassenarbeit 1 mit 15 Aufgaben und 30 Punkten.
+- Jede der drei Klassenarbeiten hat 15 Aufgaben, 30 Punkte und eine empfohlene Arbeitszeit von 45 Minuten.
+- Fortschritt und Fehlerlösungen sind je Kind sichtbar; die Lernstände lassen sich einzeln zurücksetzen.
+
+Wichtig für die Online-Lernstände
+Die Datei firebase-regeln-komplett-grammatik.json enthält die erweiterten Firebase-Regeln für battle8 bis battle10 und die drei einzelnen Rücksetzungen. Damit die neuen Klassenarbeiten online in der Live-Übersicht gespeichert werden, muss diese Regeldatei zusätzlich in der Firebase Console unter Realtime Database → Rules übernommen und gespeichert werden. Die vorhandene Firebase-Konfiguration bleibt erhalten.
+
+Neue Funktionen – Tages- und Wochenübersicht
+- Tages- und Wochenzahlen stehen direkt beim passenden Übungsbereich. So erscheinen Übungen nicht zusätzlich in einer zweiten Gesamttabelle.
+- Die Woche läuft von Montag bis Sonntag (deutsche Zeitzone). Die Wochenzählung beginnt mit der neuen Kalenderwoche automatisch neu.
+- Die Zähler bleiben erhalten, wenn Lernstände zurückgesetzt werden. Sie beginnen erst nach dem Hochladen dieser Version; frühere Übungsstarts werden nicht nachgetragen.
+- Ein gemeinsamer Kindfilter oben wirkt auf Englisch und Mathe. Die Schrift der Tages- und Wochenzahlen ist gut lesbar.
+- Bei falschen Antworten erscheint zuerst ein Tipp. Die ausführliche Lösung und der Rechenweg lassen sich anschließend öffnen.
+
+Für die Zähler muss die beigefügte Datei firebase-regeln-komplett-grammatik.json in der Firebase Console unter Realtime Database → Rules übernommen und gespeichert werden. GitHub Pages kann diese Firebase-Regeln nicht automatisch aktualisieren.
+
+Übersichtlichkeit der Elternseite
+- Zusätzlich verschachtelte Fachüberschriften wurden entfernt. Jeder Fortschrittsbereich erscheint einmal; die Fehlerlisten stehen darunter. Die gemischte Arbeit zu Brüchen und rationalen Zahlen ist getrennt von den Proportional-Arbeiten benannt.
+- Englisch und Mathe haben oben je einen gemeinsamen Kindfilter. Schrift und Farben bleiben gut lesbar und ruhig.
+
+Fachtrennung auf der Elternseite
+- Nach „Live-Lernübersicht“ erscheinen zuerst nur zwei große Bereiche: Englisch und Mathe. Erst beim Antippen öffnet sich das jeweilige Fach mit seinen Themen, Ergebnissen, Fehlerlisten, Klassenarbeiten und Zurücksetz-Optionen.
+- Der Kindfilter wirkt in beiden Bereichen. Die Fortschritte und Zähler bleiben nach Fach getrennt.
+
+Neue Funktion – tägliche und wöchentliche Fehlerauswertung
+- Auf der Kinder-Startseite gibt es „Auswertung Englisch“ und „Auswertung Mathe“. Nach Auswahl des Kindes kann zwischen täglicher und wöchentlicher Auswertung gewählt werden.
+- Fehler werden je Fach und Thema gebündelt. Offene Fehler bleiben in der Liste, bis das Kind sie richtig löst. Bei Mathe wird bei einer falschen Antwort auch der gespeicherte Rechenweg angezeigt.
+- Die Eltern-Live-Übersicht enthält unter Englisch und Mathe jeweils eine tägliche und eine wöchentliche Fehlerauswertung. Sie zeigt pro Kind und Thema, welche Fehler noch offen oder richtig bearbeitet sind.
+- Beim ersten Öffnen übernimmt die Kinderseite vorhandene lokal gespeicherte Fehler. Danach werden neue Fehler samt Zeitraum online gespeichert und in der Elternansicht aktualisiert.
+- Für diese Ergänzung sind keine neuen Firebase-Regeln nötig. Die Fehler werden in den vorhandenen Lernaktivitäts-Einträgen gespeichert.

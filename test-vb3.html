@@ -1,0 +1,21 @@
+<!doctype html>
+<html lang="de"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>VOCAB BATTLE 3.0 – Test</title><style>body{font:17px system-ui,sans-serif;background:#211a43;color:white;padding:18px;line-height:1.5}.item{background:#383063;border-radius:12px;padding:13px;margin:10px 0;overflow-wrap:anywhere}.ok{color:#9ef7ac}.bad{color:#ffb7b7}small{color:#ddd}</style></head><body><h2>🔎 VOCAB BATTLE 3.0 – neuer Test</h2><p id="status">JavaScript wird gestartet …</p><div id="results"></div>
+<script>
+(function(){
+var status=document.getElementById('status');
+var results=document.getElementById('results');
+status.textContent='✅ JavaScript läuft. Dateien werden geprüft …';
+var files=['firebase-config.js','questions.js','math-questions.js','grammar-data.js','app.js'];
+var i=0;
+function next(){
+ if(i>=files.length){status.textContent='✅ Prüfung abgeschlossen';return;}
+ var name=files[i++];var row=document.createElement('div');row.className='item';row.textContent='⏳ '+name;results.appendChild(row);
+ fetch('./'+name+'?t='+Date.now(),{cache:'no-store'}).then(function(response){if(!response.ok)throw Error('HTTP '+response.status);return response.text();}).then(function(source){
+ row.innerHTML='<b class="ok">✅ '+name+'</b><div><small>'+source.length+' Zeichen geladen</small></div>';
+ if(!source.trim())row.innerHTML='<b class="bad">❌ '+name+' ist leer</b>';
+ next();
+ }).catch(function(err){row.innerHTML='<b class="bad">❌ '+name+'</b><div>'+String(err)+'</div>';next();});
+}
+next();
+})();
+</script></body></html>

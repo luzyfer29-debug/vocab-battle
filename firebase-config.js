@@ -3,8 +3,5 @@ export const firebaseConfig = {
   authDomain: "englisch-vokabeln-157c0.firebaseapp.com",
   databaseURL: "https://englisch-vokabeln-157c0-default-rtdb.europe-west1.firebasedatabase.app",
   projectId: "englisch-vokabeln-157c0",
-  storageBucket: "englisch-vokabeln-157c0.firebasestorage.app",
-  messagingSenderId: "688719118860",
-  appId: "1:688719118860:web:90ae7e2609bc8fa236a429",
-  measurementId: "G-XRRY82NYNL"
+  appId: "1:688719118860:web:90ae7e2609bc8fa236a429"
 };
