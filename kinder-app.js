@@ -211,9 +211,52 @@ function vocabRender(page,checked=vocabChecked(page)){
  const accepted=data.items.map(x=>x.accepted),correct=accepted.filter((a,i)=>a.some(x=>grammarNormalize(x)===grammarNormalize(values[i]))).length;
  const body=page===0?vocabPageOne(values,checked):vocabPageTwo(values,checked);
  app.innerHTML=card(`<style>
- .vocab-sheet{background:#fff;color:#171717;border:1px solid #c8c8c8;padding:16px 15px 20px;font-family:Arial,Helvetica,sans-serif;font-size:16px;line-height:1.6;box-shadow:0 5px 16px #0a142255}
- .vocab-sheet *{box-sizing:border-box}.vocab-topline{height:34px;display:flex;align-items:center;justify-content:space-between;border-bottom:4px solid #aaa;color:#777;font-size:14px;letter-spacing:.08em;margin-bottom:16px}.vocab-topline b{display:grid;place-items:center;width:32px;height:32px;border:3px solid #aaa;border-radius:50%;font-size:17px;color:#777}.vocab-student-line{display:flex;justify-content:space-between;gap:9px;margin:16px 0 25px;font-size:14px}.vocab-student-line u{display:inline-block;min-width:50px;text-decoration:none;border-bottom:1px solid #555}.vocab-sheet h2{font-size:25px;margin:0 0 14px;color:#171717}.vocab-task{margin:0 0 25px}.vocab-task h3{font-size:17px;line-height:1.4;margin:0 0 12px;color:#151515}.vocab-task h3 b{display:inline-grid;place-items:center;width:28px;height:28px;margin-right:7px;background:#e5e5e5;border-radius:50%;font-size:17px}.vocab-icons{display:grid;grid-template-columns:repeat(3,1fr);text-align:center;font-size:29px;height:42px;align-items:center}.vocab-sports{width:100%;border-collapse:collapse;table-layout:fixed;font-size:14px}.vocab-sports th,.vocab-sports td{border:1px solid #555;padding:7px 6px}.vocab-sports th{background:#d7d7d7;text-align:left}.vocab-sports td{height:52px}.vocab-answer{display:inline-flex;vertical-align:middle;flex-direction:column;align-items:stretch;max-width:100%;min-width:0}.vocab-sheet input[data-vocab]{width:100%;min-width:55px;max-width:150px;height:40px;padding:5px 6px;border:0;border-bottom:2px solid #777;border-radius:0;background:#fff;color:#171717;font:inherit;font-size:17px;outline:0}.vocab-correct-answer{color:#b52f2f;font-size:11px;line-height:1.1}.vocab-points{text-align:right;color:#666;font-size:14px;margin-top:4px}.vocab-opposite-grid{display:grid;grid-template-columns:1fr 1fr;gap:9px 14px}.vocab-opposite{display:flex;align-items:center;gap:7px;white-space:nowrap;font-size:15px}.vocab-opposite .vocab-answer{flex:1}.vocab-opposite input[data-vocab]{max-width:none;min-width:42px}.vocab-sentence{margin:12px 0;line-height:1.9;font-size:16px}.vocab-sentence strong{margin-right:4px}.vocab-sentence .vocab-answer{min-width:100px}.vocab-message{border:1px solid #555;margin-top:12px}.vocab-message-bar{height:20px;background:#d2d2d2;border-bottom:1px solid #555;display:flex;justify-content:space-between;align-items:center}.vocab-message-bar b{width:22px;text-align:center;border-left:1px solid #555}.vocab-message-body{padding:8px 12px 5px;font-size:15px;line-height:1.95}.vocab-message-body p{margin:14px 0}.vocab-message-body .vocab-answer{min-width:70px;vertical-align:baseline}.vocab-message-body input[data-vocab]{height:34px;font-size:16px;min-width:74px;max-width:135px}.vocab-task-four h3{font-size:16px}.vocab-score-line{margin-top:26px;font-size:14px}.vocab-score-line span{display:inline-block;width:22px;height:22px;background:#bbb;vertical-align:middle}
- @media(max-width:600px){#app>.card:has(.vocab-sheet){padding:9px;border-radius:14px}.vocab-sheet{padding:13px 10px 18px;font-size:16px}.vocab-student-line{display:grid;grid-template-columns:1fr 1fr;gap:10px 12px;margin:14px 0 22px;font-size:14px}.vocab-student-line span:last-child{grid-column:1/-1}.vocab-sheet h2{font-size:24px}.vocab-task h3{font-size:16px}.vocab-sports{font-size:13px}.vocab-sports th,.vocab-sports td{padding:6px 5px}.vocab-sports td{height:50px}.vocab-opposite-grid{grid-template-columns:1fr;gap:8px}.vocab-opposite{font-size:16px;white-space:normal;gap:9px}.vocab-opposite input[data-vocab]{min-width:72px}.vocab-sentence{font-size:16px;line-height:1.8}.vocab-sentence .vocab-answer{min-width:95px}.vocab-message-body{padding:6px 8px;font-size:15px;line-height:1.9}.vocab-message-body p{margin:12px 0}.vocab-message-body .vocab-answer{min-width:78px}.vocab-message-body input[data-vocab]{height:34px;max-width:130px;min-width:72px;font-size:16px}.vocab-correct-answer{font-size:13px}.vocab-score-line{margin-top:20px;font-size:14px}}
+ .vocab-sheet{background:transparent;color:#f4f8fc;border:0;padding:0;font-family:inherit;font-size:16px;line-height:1.6;box-shadow:none}
+ .vocab-sheet *{box-sizing:border-box}
+ .vocab-topline{min-height:46px;display:flex;align-items:center;justify-content:space-between;gap:8px;padding:7px 12px;border:0;border-radius:13px;background:linear-gradient(120deg,#2879bb,#27b7a5);color:#fff;font-size:13px;letter-spacing:.07em;margin-bottom:15px}
+ .vocab-topline b{display:grid;place-items:center;width:32px;height:32px;border:2px solid rgba(255,255,255,.65);border-radius:50%;font-size:16px;color:#fff}
+ .vocab-student-line{display:flex;justify-content:space-between;gap:9px;flex-wrap:wrap;margin:0 0 18px;padding:10px 12px;border:1px solid #435c78;border-radius:12px;background:#17263a;color:#d5e2f1;font-size:14px}
+ .vocab-student-line u{display:inline-block;min-width:50px;color:#fff;text-decoration:none;border-bottom:1px solid #70c9e9}
+ .vocab-sheet h2{font-size:24px;margin:0 0 15px;color:#fff}
+ .vocab-task{margin:0 0 15px;padding:15px;border:1px solid #435b77;border-left:4px solid #62d6c4;border-radius:16px;background:linear-gradient(145deg,#253a54,#1b2c42);box-shadow:0 6px 18px rgba(4,10,24,.16)}
+ .vocab-task h3{font-size:17px;line-height:1.4;margin:0 0 12px;color:#f5f8fc}
+ .vocab-task h3 b{display:inline-grid;place-items:center;width:29px;height:29px;margin-right:7px;background:#62d6c4;color:#142338;border-radius:10px;font-size:17px}
+ .vocab-icons{display:grid;grid-template-columns:repeat(3,1fr);text-align:center;font-size:28px;height:42px;align-items:center}
+ .vocab-sports{width:100%;border-collapse:separate;border-spacing:0;table-layout:fixed;overflow:hidden;border:1px solid #536d89;border-radius:11px;font-size:14px}
+ .vocab-sports th,.vocab-sports td{border-right:1px solid #536d89;border-bottom:1px solid #536d89;padding:7px 6px}
+ .vocab-sports th:last-child,.vocab-sports td:last-child{border-right:0}.vocab-sports tbody tr:last-child td{border-bottom:0}
+ .vocab-sports th{background:#3a5877;color:#fff;text-align:left;line-height:1.25}
+ .vocab-sports td{height:56px;background:#1a2b40}
+ .vocab-answer{display:inline-flex;vertical-align:middle;flex-direction:column;align-items:stretch;max-width:100%;min-width:0}
+ .vocab-sheet input[data-vocab]{width:100%;min-width:55px;max-width:150px;height:42px;padding:7px 9px;border:2px solid #607d9a;border-radius:9px;background:#101f32;color:#fff;font:inherit;font-size:17px;outline:0;box-shadow:inset 0 1px 3px rgba(0,0,0,.18)}
+ .vocab-sheet input[data-vocab]:focus{border-color:#62d6c4;box-shadow:0 0 0 3px rgba(98,214,196,.2)}
+ .vocab-correct-answer{color:#ffaaaa;font-size:13px;line-height:1.25;margin-top:3px}
+ .vocab-points{display:table;margin:10px 0 0 auto;padding:4px 10px;border:1px solid #4c6683;border-radius:999px;background:#17283d;color:#d5e2f1;font-size:13px;font-weight:750}
+ .vocab-opposite-grid{display:grid;grid-template-columns:1fr 1fr;gap:9px}
+ .vocab-opposite{display:flex;align-items:center;gap:8px;white-space:nowrap;padding:7px 9px;border:1px solid #435b77;border-radius:11px;background:#17283d;color:#edf4fc;font-size:15px}
+ .vocab-opposite .vocab-answer{flex:1;min-width:72px}
+ .vocab-opposite input[data-vocab]{max-width:none;min-width:0}
+ .vocab-sentence{margin:11px 0;padding:9px 10px;border-radius:10px;background:#17283d;color:#edf4fc;line-height:1.8;font-size:16px}
+ .vocab-sentence strong{display:inline-block;margin-right:5px;color:#62d6c4}
+ .vocab-sentence .vocab-answer{min-width:96px}
+ .vocab-message{overflow:hidden;border:1px solid #536d89;border-radius:13px;margin-top:12px;background:#17283d}
+ .vocab-message-bar{height:36px;padding:0 10px;background:#304d6a;border-bottom:1px solid #536d89;display:flex;justify-content:space-between;align-items:center;color:#eaf3fc}
+ .vocab-message-bar b{width:28px;height:28px;display:grid;place-items:center;border:1px solid #66829f;border-radius:8px}
+ .vocab-message-body{padding:7px 12px 5px;color:#edf4fc;font-size:15px;line-height:1.9;overflow-wrap:anywhere}
+ .vocab-message-body p{margin:12px 0}
+ .vocab-message-body .vocab-answer{min-width:76px;vertical-align:baseline}
+ .vocab-message-body input[data-vocab]{height:36px;font-size:16px;min-width:72px;max-width:135px}
+ .vocab-task-four h3{font-size:16px}
+ .vocab-score-line{margin-top:19px;padding:10px 12px;border:1px solid #435b77;border-radius:11px;background:#17283d;color:#e5eef8;font-size:14px}
+ .vocab-score-line span{display:inline-block;width:24px;height:24px;margin-left:5px;border-radius:7px;background:#47627e;vertical-align:middle}
+ @media(max-width:600px){
+  .vocab-sheet{font-size:16px}.vocab-task{padding:13px;margin-bottom:13px}.vocab-task h3{font-size:16px}
+  .vocab-student-line{display:grid;grid-template-columns:1fr 1fr;gap:9px 12px;font-size:14px}.vocab-student-line span:last-child{grid-column:1/-1}
+  .vocab-sports{font-size:13px}.vocab-sports th,.vocab-sports td{padding:7px 5px}.vocab-sports td{height:54px}
+  .vocab-opposite-grid{grid-template-columns:1fr;gap:8px}.vocab-opposite{font-size:16px;white-space:normal;padding:7px 9px}.vocab-opposite .vocab-answer{min-width:90px}
+  .vocab-sentence{font-size:16px;line-height:1.8}.vocab-sentence .vocab-answer{min-width:94px}
+  .vocab-message-body{padding:6px 9px;font-size:15px;line-height:1.9}.vocab-message-body p{margin:11px 0}.vocab-message-body .vocab-answer{min-width:80px}.vocab-message-body input[data-vocab]{min-width:74px;max-width:132px;font-size:16px}
+ }
  </style><div class="vocab-sheet">${vocabSheetHeader(page)}${page===0?vocabPageOne(values,checked):vocabPageTwo(values,checked)}</div>${checked?`<p class="good"><strong>${correct} von ${accepted.length} richtig.</strong> Du kannst rote Antworten verbessern und erneut prüfen.</p>`:'<p class="muted">Schreibe die Antworten selbst in die Linien. Erst danach auf „Antworten prüfen“ tippen.</p>'}<div class="solo-actions">${btn('✅ Antworten prüfen','vocabCheck')}${btn('🔄 Seite leeren','vocabClear','alt')}</div><p class="muted small">${esc(soloName)} · ${esc(data.title)}</p>`)+card(btn('Zur Englisch-Auswahl','soloHome','alt'));
 }
 async function syncVocabPageProgress(page,values,correct){if(!db||!uid||!soloName)return;const data=VOCAB_WORK_PAGES[page],now=Date.now(),done=values.filter(v=>String(v||'').trim()).length;try{await set(ref(db,`soloProgress/${uid}/${soloName}/vocabStation1Page${page+1}`),{name:soloName,page:page+1,done,total:data.items.length,correct,score:correct,checked:true,finished:correct===data.items.length,updatedAt:now});}catch{msg('Der Lernstand dieser Seite konnte gerade nicht online gespeichert werden.',true);}}
